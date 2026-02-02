@@ -10,22 +10,22 @@ def minify_html(content):
     content = re.sub(r'>\s+<', '><', content)
     return content.strip()
 
-print("🏭 [사각함대 자동화 공장] 가동 시작...")
+print("🏭 [사각함대 자동화 공장] 가동 시작 (난독화 Only)...")
 
 try:
-    # 원본 읽기
+    if not os.path.exists('source.html'):
+        print("❌ [오류] source.html이 없습니다. 1단계에서 파일을 제대로 만드셨나요?")
+        exit()
+
     with open('source.html', 'r', encoding='utf-8') as f:
         original_code = f.read()
-
-    # 압축 수행
+    
     minified_code = minify_html(original_code)
-
-    # 배포용 파일 생성
+    
     with open('index.html', 'w', encoding='utf-8') as f:
         f.write(minified_code)
-
-    print(f"✅ [성공] 'source.html'을 압축하여 'index.html'을 생산했습니다.")
-    print(f"📉 [압축률] {len(original_code)} → {len(minified_code)} bytes")
+        
+    print(f"✅ [성공] 'source.html'(22장 원본)을 압축하여 'index.html'(배포용)을 생산했습니다.")
 
 except Exception as e:
     print(f"❌ [오류] {e}")
