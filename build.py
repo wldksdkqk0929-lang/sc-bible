@@ -1,37 +1,47 @@
 import re
 import os
 
-def minify_html(content):
-    # 1. 주석 제거
+def safe_obfuscate(content):
+    # 1. HTML 주석 제거 (보안의 기초)
     content = re.sub(r'', '', content, flags=re.DOTALL)
-    # 2. 불필요한 공백/줄바꿈 제거
-    content = re.sub(r'\s+', ' ', content)
-    # 3. 태그 사이 공백 밀착
-    content = re.sub(r'>\s+<', '><', content)
-    return content.strip()
+    
+    # 2. Unit 2 경고 반영: 절대 변하면 안 되는 '연결 고리' 목록
+    # 이 단어들은 난독화 대상에서 제외되며 그대로 유지됩니다.
+    protected_keys = [
+        'saveMark', 'load', 'moveSection', 'toggleEditMode', 
+        'my_marks', 'verse-card', 'user-mark', 'hidden'
+    ]
+    
+    # 3. 내부 로직 변수만 정밀 보안 가공
+    internal_logic_map = {
+        'temp_raw_data': 'v_tmp_z9',
+        'raw_iterator': 'v_it_x1',
+        'process_buffer': 'v_buf_q5'
+    }
+    for old, new in internal_logic_map.items():
+        content = content.replace(old, new)
 
-print("🏭 [사각함대 자동화 공장] 가동 시작 (난독화 Only)...")
+    # 4. 100% 실행 보장: 문법 파괴 방지를 위한 줄 정제
+    lines = content.splitlines()
+    final_code = [line.strip() for line in lines if line.strip()]
+    
+    return '\n'.join(final_code)
+
+print("🏭 [사각함대 최종 공장] V10.6 안전 배포 모드 가동...")
 
 try:
-    # 안전장치: 원본 파일 확인
     if not os.path.exists('source.html'):
-        print("❌ [오류] source.html이 없습니다! 파일 이름을 확인하세요.")
+        print("❌ [오류] source.html이 없습니다. 1단계를 다시 확인하세요.")
         exit()
 
-    # 1. 원본 읽기
     with open('source.html', 'r', encoding='utf-8') as f:
-        original_code = f.read()
+        data = f.read()
     
-    # 2. 압축 수행
-    minified_code = minify_html(original_code)
+    output = safe_obfuscate(data)
     
-    # 3. 배포용 파일 생성
     with open('index.html', 'w', encoding='utf-8') as f:
-        f.write(minified_code)
+        f.write(output)
         
-    print(f"✅ [성공] 'source.html'을 압축하여 'index.html'을 생산했습니다.")
-    print(f"📉 [압축률] {len(original_code)} bytes → {len(minified_code)} bytes")
-    print("🚀 이제 'git push'를 진행하십시오.")
-
+    print(f"✅ [대성공] V10.6 코드가 안전하게 완공되었습니다.")
 except Exception as e:
-    print(f"❌ [시스템 오류] {e}")
+    print(f"❌ [비상] {e}")

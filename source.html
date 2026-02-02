@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>순천 교육부 천국고시 암기 시스템 (V8.1 Gold)</title>
+    <title>순천 교육부 천국고시 (V10.6 Final)</title>
     <style>
         :root {
             /* [Day Mode] */
@@ -12,267 +12,318 @@
             --glass-border: rgba(255, 255, 255, 0.4);
             --glass-header: rgba(255, 255, 255, 0.3);
             --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --text-main: #2d3436; 
-            --text-sub: #58636d;
-            --text-num: #764ba2;
+            
+            /* 주간: 진한 남색 */
+            --strong-badge-bg: #4834d4; 
+            --strong-badge-text: #ffffff;
+            
+            --text-main: #2d3436; --text-sub: #58636d; --text-num: #764ba2;
             --shadow-soft: 0 8px 32px 0 rgba(31, 38, 135, 0.10);
-            --btn-base: rgba(255,255,255,0.4);
-            --btn-active-text: #fff;
-            --pill-badge-bg: var(--primary-gradient);
-            --pill-text: #fff;
-            --watermark-opacity: 0.04;
+            --btn-base: rgba(255,255,255,0.4); --btn-active-text: #fff;
+            --input-bg: #f1f3f5; --input-border: #ced4da; --input-text: #2d3436;
+            --highlight-color: rgba(255, 215, 0, 0.4);
+            --dock-text-color: #fff; 
         }
-
-        /* [Night Mode: Deep Muted & Copper] */
+        /* [Night Mode] */
         [data-theme="dark"] {
             --bg-gradient: linear-gradient(135deg, #1a1e26 0%, #2d3436 100%);
-            --glass-card-bg: rgba(30, 34, 40, 0.85);
-            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-card-bg: rgba(30, 34, 40, 0.85); --glass-border: rgba(255, 255, 255, 0.08);
             --glass-header: rgba(26, 30, 38, 0.8);
             --primary-gradient: linear-gradient(135deg, #C2935A 0%, #A67C49 100%);
-            --text-main: #A6AFB7; 
-            --text-sub: #606A74;
-            --text-num: #C2935A;
+            
+            /* 야간: 머스타드 골드 */
+            --strong-badge-bg: #FDCB6E;
+            --strong-badge-text: #2d3436;
+            
+            --text-main: #A6AFB7; --text-sub: #606A74; --text-num: #C2935A;
             --shadow-soft: 0 10px 40px rgba(0, 0, 0, 0.5);
-            --btn-base: rgba(255, 255, 255, 0.05);
-            --btn-active-text: #1a1e26;
-            --pill-badge-bg: var(--primary-gradient);
-            --pill-text: #1a1e26;
-            --watermark-opacity: 0.04;
+            --btn-base: rgba(255, 255, 255, 0.05); --btn-active-text: #1a1e26;
+            --input-bg: rgba(0, 0, 0, 0.3); --input-border: rgba(255, 255, 255, 0.15); --input-text: #e9ecef;
+            --highlight-color: rgba(194, 147, 90, 0.4);
+            --dock-text-color: #000; 
         }
 
         body {
-            margin: 0; 
-            background-image: var(--bg-gradient);
+            margin: 0; background-image: var(--bg-gradient);
             background-attachment: fixed; background-size: 400% 400%;
-            color: var(--text-main);
-            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
-            -webkit-user-select: none; user-select: none;
+            color: var(--text-main); font-family: 'Pretendard', sans-serif;
             overflow-x: hidden; padding-bottom: 140px;
-            animation: gradientBG 15s ease infinite;
-            transition: color 0.4s, background-image 0.6s;
+            animation: gradientBG 15s ease infinite; transition: color 0.4s;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
         }
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
+        @keyframes gradientBG { 0% {background-position:0% 50%} 50% {background-position:100% 50%} 100% {background-position:0% 50%} }
 
-        /* [워터마크 최상위 고정] */
+        body.mode-memorize .verse-text { user-select: none; -webkit-user-select: none; }
+        body.mode-marking .verse-text { user-select: text; -webkit-user-select: text; cursor: text; }
+        body.mode-marking .verse-card { background: rgba(255,255,255,0.9); border: 2px solid var(--text-num); }
+        [data-theme="dark"] body.mode-marking .verse-card { background: rgba(40,40,40,0.9); }
+
         .watermark {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 9999; 
-            opacity: var(--watermark-opacity);
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; opacity: 0.04;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Ctext x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' transform='rotate(-45 150 150)' fill='%232c3e50' font-size='18' font-weight='bold' font-family='sans-serif'%3E순천 교육부 천국고시 준비자료%3C/text%3E%3C/svg%3E");
         }
         [data-theme="dark"] .watermark { filter: invert(0.8); }
 
         header {
-            position: sticky; top: 0; z-index: 1000;
-            background: var(--glass-header);
-            border-bottom: 1px solid var(--glass-border);
-            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            display: flex; flex-direction: column;
-            transition: background 0.3s;
+            position: sticky; top: 0; z-index: 1000; background: var(--glass-header);
+            border-bottom: 1px solid var(--glass-border); backdrop-filter: blur(12px);
+            display: flex; flex-direction: column; transition: background 0.3s;
         }
 
-        .theme-toggle {
-            position: absolute; top: 12px; right: 15px;
-            width: 36px; height: 36px;
-            border-radius: 50%; border: 1px solid var(--glass-border);
-            background: var(--glass-card-bg);
-            color: var(--text-main);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 18px; cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            z-index: 1001; transition: 0.3s;
+        .control-island {
+            position: absolute; top: 10px; right: 15px; z-index: 1002;
+            display: flex; gap: 8px; padding: 6px 12px; border-radius: 30px;
+            background: var(--glass-card-bg); box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            backdrop-filter: blur(20px); border: 1px solid var(--glass-border);
         }
 
-        .row-chapters { 
-            padding: 12px 15px; display: flex; gap: 8px; 
-            overflow-x: auto; scrollbar-width: none; 
-            flex-wrap: nowrap; padding-right: 60px; 
-        }
-        .row-chapters::-webkit-scrollbar { display: none; }
-        
-        .ch-btn {
-            flex-shrink: 0;
-            background: var(--btn-base); 
-            border: 1px solid var(--glass-border); border-radius: 12px;
-            padding: 8px 16px; font-size: 15px; font-weight: 700; color: var(--text-sub);
-            cursor: pointer; transition: 0.3s;
-        }
-        .ch-btn.active {
-            background: var(--primary-gradient); 
-            color: var(--btn-active-text); border: 1px solid transparent;
-            box-shadow: 0 4px 12px rgba(0,0,0, 0.1);
-            transform: scale(1.05);
-        }
-
-        .row-subs {
-            padding: 10px 15px; display: flex; gap: 8px; 
-            overflow-x: auto; border-bottom: 1px solid var(--glass-border); scrollbar-width: none;
-        }
-        .sub-btn {
-            flex-shrink: 0;
-            background: var(--btn-base); 
-            border: 1px solid var(--glass-border); color: var(--text-sub);
-            border-radius: 12px; padding: 6px 16px; font-size: 13px; font-weight: 600;
+        .icon-btn {
+            width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--glass-border);
+            background: transparent; color: var(--text-main);
+            display: flex; align-items: center; justify-content: center; font-size: 16px;
             cursor: pointer; transition: 0.2s;
         }
-        .sub-btn.active-sub { 
-            background: var(--primary-gradient); color: var(--btn-active-text);
-            border-color: transparent;
-            transform: scale(1.05);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        .icon-btn.active { background: var(--primary-gradient); color: #fff; border-color: transparent; }
+
+        .row-chapters { padding: 12px 15px; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-right: 160px; }
+        .row-chapters::-webkit-scrollbar { display: none; }
+        .ch-btn {
+            flex-shrink: 0; background: var(--btn-base); border: 1px solid var(--glass-border);
+            border-radius: 12px; padding: 8px 16px; font-size: 15px; font-weight: 700; color: var(--text-sub);
+            cursor: pointer; transition: 0.3s;
         }
+        .ch-btn.active { background: var(--primary-gradient); color: var(--btn-active-text); transform: scale(1.05); }
+
+        .row-subs { padding: 10px 15px; display: flex; gap: 8px; overflow-x: auto; border-bottom: 1px solid var(--glass-border); scrollbar-width: none; }
+        .sub-btn {
+            flex-shrink: 0; background: var(--btn-base); border: 1px solid var(--glass-border);
+            color: var(--text-sub); border-radius: 12px; padding: 6px 16px; font-size: 13px; font-weight: 600;
+            cursor: pointer; transition: 0.2s;
+        }
+        .sub-btn.active-sub { background: var(--primary-gradient); color: var(--btn-active-text); transform: scale(1.05); }
 
         main { width: 100%; max-width: 1200px; margin: 0 auto; padding: 20px 15px; box-sizing: border-box; }
-
+        
         .section-group {
-            scroll-margin-top: 150px; margin-bottom: 25px;
-            background: var(--glass-card-bg); 
-            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px; 
-            box-shadow: var(--shadow-soft);
-            overflow: hidden; 
-            transition: background 0.3s, border 0.3s;
+            scroll-margin-top: 180px; 
+            margin-bottom: 25px; background: var(--glass-card-bg);
+            backdrop-filter: blur(10px); border: 1px solid var(--glass-border);
+            border-radius: 20px; box-shadow: var(--shadow-soft); overflow: hidden;
         }
 
         .sec-header {
-            background: rgba(0,0,0,0.03); 
-            border-bottom: 1px solid var(--glass-border);
-            padding: 15px 20px;
-            display: flex; justify-content: space-between; align-items: center; gap: 15px;
+            background: rgba(0,0,0,0.03); border-bottom: 1px solid var(--glass-border);
+            padding: 15px 20px; display: flex; align-items: center; 
+            justify-content: space-between; 
+            gap: 15px;
         }
+        
+        .sec-btn-group { flex-shrink: 0; display: flex; align-items: center; gap: 8px; }
         
         .sec-title-text {
-            flex: 1; font-size: 18px; font-weight: 800;
+            flex-grow: 1; font-size: 18px; font-weight: 800;
             background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            text-align: right; word-break: keep-all;
         }
-
-        .sec-btn-group { flex-shrink: 0; display: flex; align-items: center; gap: 8px; }
 
         .pill-badge {
-            background: var(--pill-badge-bg);
-            color: var(--pill-text); padding: 6px 12px; border-radius: 18px;
-            font-size: 12px; font-weight: 700; border: none; cursor: pointer;
-            display: flex; align-items: center; gap: 4px; white-space: nowrap;
+            padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; 
+            border: none; cursor: pointer; display: flex; align-items: center; gap: 4px;
         }
         .pill-badge.info { 
-            background: rgba(128,128,128,0.1); color: var(--text-sub); cursor: default; 
+            background: var(--strong-badge-bg); color: var(--strong-badge-text);
+            font-weight: 900; transform: scale(1.05); cursor: default; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
+        .pill-badge.eye-btn { background: var(--primary-gradient); color: #fff; }
 
-        /* [Verse-Flex: 터치 위치 완벽 고정] */
         .verse-card {
-            display: flex; align-items: flex-start; gap: 15px;
-            padding: 20px; border-bottom: 1px solid var(--glass-border);
-            line-height: 1.75; font-size: 17px; cursor: pointer; position: relative;
+            display: flex; align-items: flex-start; gap: 15px; padding: 20px;
+            border-bottom: 1px solid var(--glass-border); line-height: 1.75; font-size: 17px; cursor: pointer;
         }
         .verse-card:last-child { border-bottom: none; }
+        .v-num { flex-shrink: 0; min-width: 30px; font-weight: 900; color: var(--text-num); text-align: right; margin-top: 2px; }
+        .verse-text { flex-grow: 1; color: var(--text-main); font-weight: 500; word-break: keep-all; position: relative; }
         
-        .v-num { 
-            flex-shrink: 0; min-width: 30px; font-weight: 900;
-            color: var(--text-num); text-align: right; margin-top: 2px;
-        }
-        
-        .verse-text { 
-            flex-grow: 1; color: var(--text-main); font-weight: 500; 
-            transition: opacity 0.3s; word-break: keep-all; position: relative;
-        }
-        
-        .hidden .verse-text { color: transparent; user-select: none; }
+        .hidden .verse-text { color: transparent; }
+        .hidden .user-mark { color: transparent !important; background: transparent !important; text-decoration: none !important; }
+
+        /* [V10.6] 터치 유도 문구: 아주 얇고 작게 */
         .hidden .verse-text::before {
             content: "👆 터치하여 확인"; position: absolute; top: 0; left: 0; 
-            color: var(--text-num); font-weight: bold; opacity: 0.8;
+            color: var(--text-num); 
+            font-weight: 300; /* Thin */
+            font-size: 0.9em; /* 작게 */
+            opacity: 0.6; /* 투명하게 */
             animation: pulseText 2s infinite;
         }
-        @keyframes pulseText { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+        @keyframes pulseText { 0% {opacity:0.3} 50% {opacity:0.7} 100% {opacity:0.3} }
 
-        .dock-container {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-            z-index: 2000; width: 95%; max-width: 400px;
+        .user-mark {
+            color: #ff4757; font-weight: 900; text-decoration: underline; text-underline-offset: 4px;
+            background: rgba(255, 71, 87, 0.1); border-radius: 4px; cursor: pointer; display: inline;
         }
+        [data-theme="dark"] .user-mark { color: #ff6b81; background: rgba(255, 107, 129, 0.15); }
+
+        .highlight-match {
+            background-color: var(--highlight-color); border-radius: 4px; padding: 2px 4px; animation: highlightPulse 2s infinite;
+        }
+        @keyframes highlightPulse { 0% {box-shadow:0 0 0 0 rgba(255,215,0,0.4)} 70% {box-shadow:0 0 0 10px rgba(255,215,0,0)} 100% {box-shadow:0 0 0 0 rgba(255,215,0,0)} }
+
+        .dock-container { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 2000; width: 95%; max-width: 450px; }
         .nav-dock {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 10px 20px; gap: 10px;
-            background: var(--glass-card-bg);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border); border-radius: 60px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
-            transition: background 0.3s;
+            display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; gap: 10px;
+            background: var(--glass-card-bg); backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border); border-radius: 60px; box-shadow: 0 15px 35px rgba(0,0,0,0.3);
         }
         .arrow-btn {
-            width: 48px; height: 48px; 
-            background: var(--btn-base); color: var(--text-num);
+            width: 48px; height: 48px; background: var(--btn-base); color: var(--text-num);
             border: 1px solid var(--glass-border); border-radius: 50%; font-size: 20px;
             cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
-        .master-btn {
-            flex: 1; height: 44px; 
-            background: var(--primary-gradient); color: var(--pill-text);
-            border: none; border-radius: 22px;
-            font-size: 14px; font-weight: 700; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
+        
+        .dock-center-btn {
+            flex: 1; height: 44px; border: none; border-radius: 22px; font-size: 15px; font-weight: 500;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
+        #masterBtn { background: var(--primary-gradient); color: var(--dock-text-color); }
+        #saveMarkBtn { 
+            display: none; background: #ff4757; color: white; 
+            box-shadow: 0 4px 12px rgba(255, 71, 87, 0.4); animation: popUp 0.3s;
+        }
+        @keyframes popUp { from {transform:scale(0)} to {transform:scale(1)} }
 
         .pc-text { display: none; }
         .mobile-text { display: inline-block; }
 
-        @media (min-width: 768px) {
-            .mobile-text { display: none; }
-            .pc-text { display: inline-block; }
-            main { padding: 40px; }
-            .row-chapters { justify-content: center; padding-right: 15px; }
-            .row-subs { justify-content: center; }
-            .verse-card { font-size: 20px; padding: 25px 30px; }
-            .master-btn { padding: 0 40px; flex: none; }
-            .theme-toggle { top: 20px; right: 30px; }
+        #modeToast {
+            position: fixed; top: 120px; left: 50%; transform: translateX(-50%);
+            background: rgba(33, 37, 41, 0.9); color: #fff; padding: 12px 24px; border-radius: 30px;
+            font-size: 14px; font-weight: 700; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); text-align: center; width: max-content;
+        }
+
+        #searchModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.98); z-index: 9999; flex-direction: column; padding: 20px; box-sizing: border-box; }
+        [data-theme="dark"] #searchModal { background: rgba(26,30,38,0.98); }
+        .search-input { flex: 1; padding: 15px; border-radius: 12px; border: 2px solid var(--input-border); background: var(--input-bg); color: var(--input-text); font-size: 16px; font-weight: 600; outline: none; }
+        
+        .result-card { background: var(--glass-card-bg); border: 1px solid var(--glass-border); border-radius: 12px; padding: 18px; margin-bottom: 12px; cursor: pointer; }
+        
+        .res-info { font-weight: 900; color: var(--text-num); font-size: 14px; margin-bottom: 5px; }
+        .res-text { font-size: 16px; line-height: 1.5; color: var(--text-main); }
+        .res-highlight { color: #e17055; font-weight: 900; background: rgba(255, 200, 0, 0.2); border-radius: 2px; }
+        
+        .status-badge {
+            background: rgba(118, 75, 162, 0.1); color: var(--text-num);
+            font-weight: 700; padding: 4px 10px; border-radius: 8px;
+            display: inline-flex; align-items: center; gap: 4px; font-size: 13px;
+        }
+        [data-theme="dark"] .status-badge { background: rgba(194, 147, 90, 0.15); }
+
+        @media (min-width: 1024px) {
+            .mobile-text { display: none; } .pc-text { display: inline-block; }
+            main { padding: 50px; max-width: 1400px; }
+            .section-group { scroll-margin-top: 240px; } 
+            
+            .sec-header { justify-content: flex-start; } 
+            .sec-title-text { font-size: 26px; text-align: left; margin-left: 15px; }
+            
+            .verse-card { font-size: 26px; padding: 40px 50px; line-height: 2.0; }
+            .v-num { font-size: 28px; min-width: 50px; }
+            .icon-btn { width: 44px; height: 44px; font-size: 22px; }
+            .control-island { top: 20px; right: 40px; padding: 10px 20px; gap: 15px; }
+            
+            .search-input { font-size: 26px; padding: 20px; }
+            .result-card { padding: 25px; }
+            .res-info { font-size: 20px; margin-bottom: 10px; }
+            .res-text { font-size: 26px; line-height: 1.8; }
         }
     </style>
 </head>
-<body oncontextmenu="return false">
+<body class="mode-memorize">
     <div class="watermark"></div>
+    <div id="modeToast"></div>
+    
     <header>
-        <button class="theme-toggle" onclick="toggleTheme()" title="모드 전환">🌙</button>
+        <div class="control-island">
+            <button id="editModeBtn" class="icon-btn" onclick="toggleEditMode()" title="암기/마킹 모드 전환">✏️</button>
+            <button class="icon-btn" onclick="openSearch()" title="검색">🔍</button>
+            <button class="icon-btn" onclick="toggleTheme()" title="모드 전환">🌙</button>
+        </div>
         <div class="row-chapters" id="chNav"></div>
         <div class="row-subs" id="subNav"></div>
     </header>
+
     <main id="content"></main>
+
     <div class="dock-container">
         <div class="nav-dock">
-            <button class="arrow-btn" onclick="move(-1)">❮</button>
-            <button id="masterBtn" class="master-btn" onclick="toggleChapter()">
+            <button class="arrow-btn" onclick="moveSection(-1)">❮</button>
+            <button id="masterBtn" class="dock-center-btn" onclick="toggleChapter()">
                 <span class="pc-text">👁️ 1장 전체보기</span>
                 <span class="mobile-text">👁️ 전체보기</span>
             </button>
-            <button class="arrow-btn" onclick="move(1)">❯</button>
+            <button id="saveMarkBtn" class="dock-center-btn" onclick="saveMark()">🖍️ 선택 저장</button>
+            <button class="arrow-btn" onclick="moveSection(1)">❯</button>
         </div>
+    </div>
+
+    <div id="searchModal">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h2 style="margin:0;">검색</h2>
+            <button onclick="closeSearch()" style="background:none; border:none; font-size:24px; color:var(--text-main); cursor:pointer;">✕</button>
+        </div>
+        <div style="display:flex; gap:10px; max-width:600px; margin:0 auto; width:100%;">
+            <input type="text" id="searchInput" class="search-input" placeholder="검색어 입력" onkeypress="if(event.key==='Enter') doSearch()">
+            <button onclick="doSearch()" style="background:var(--primary-gradient); color:#fff; border:none; padding:0 25px; border-radius:12px; font-weight:700; cursor:pointer;">검색</button>
+        </div>
+        <div id="searchStatusBox" style="text-align:center; margin:15px; display:none;">
+            <span id="searchCount"></span>
+        </div>
+        <div id="searchResults" style="flex:1; overflow-y:auto; padding-bottom:50px;"></div>
     </div>
 
 <script>
     const db = {}; 
-    window.addBibleData = function(ch, data) {
-        db[ch] = data;
-        if(currentChapter === ch) load(ch);
-    };
+    window.addBibleData = function(ch, data) { db[ch] = data; if(currentChapter === ch) load(ch); };
 
     let currentChapter = 1;
     let currentSecIndex = 0;
     let observer = null;
+    let isMarkingMode = false;
+    let selectedText = ""; 
+    let isAutoScrolling = false; 
+
+    const Storage = {
+        get: () => JSON.parse(localStorage.getItem('my_marks') || '{}'),
+        set: (data) => localStorage.setItem('my_marks', JSON.stringify(data)),
+        add: (ch, verseIdx, text) => {
+            const data = Storage.get();
+            const key = `${ch}-${verseIdx}`;
+            if(!data[key]) data[key] = [];
+            if(!data[key].includes(text)) data[key].push(text);
+            Storage.set(data);
+        },
+        remove: (ch, verseIdx, text) => {
+            const data = Storage.get();
+            const key = `${ch}-${verseIdx}`;
+            if(data[key]) {
+                data[key] = data[key].filter(t => t !== text);
+                if(data[key].length === 0) delete data[key];
+                Storage.set(data);
+            }
+        }
+    };
 
     function initTheme() {
         const savedTheme = localStorage.getItem('theme') || 'light'; 
         document.documentElement.setAttribute('data-theme', savedTheme);
         updateThemeIcon(savedTheme);
     }
-    
     function updateThemeIcon(theme) {
-        const btn = document.querySelector('.theme-toggle');
-        btn.innerText = theme === 'dark' ? '☀️' : '🌙'; 
+        const btn = document.querySelectorAll('.icon-btn')[2];
+        if(btn) btn.innerText = theme === 'dark' ? '☀️' : '🌙'; 
     }
-
     window.toggleTheme = function() {
         const doc = document.documentElement;
         const current = doc.getAttribute('data-theme');
@@ -288,25 +339,253 @@
         for(let i=1; i<=22; i++) {
             const b = document.createElement('button');
             b.className = `ch-btn ${i===1?'active':''}`;
-            b.innerText = i+'장';
-            b.onclick = () => load(i);
+            b.innerText = i; b.onclick = () => load(i);
             nav.appendChild(b);
         }
+        document.addEventListener('selectionchange', handleSelection);
         setTimeout(() => load(1), 100);
     }
 
+    window.toggleEditMode = function() {
+        isMarkingMode = !isMarkingMode;
+        const body = document.body;
+        const btn = document.getElementById('editModeBtn');
+        const toast = document.getElementById('modeToast');
+        
+        if(isMarkingMode) {
+            body.classList.remove('mode-memorize');
+            body.classList.add('mode-marking');
+            btn.classList.add('active');
+            document.querySelectorAll('.verse-card').forEach(c => c.classList.remove('hidden'));
+            toast.innerText = "🖍️ 마킹 모드 (드래그하여 저장, 클릭하여 삭제)";
+            toast.style.opacity = 1;
+        } else {
+            body.classList.remove('mode-marking');
+            body.classList.add('mode-memorize');
+            btn.classList.remove('active');
+            window.getSelection().removeAllRanges();
+            document.getElementById('saveMarkBtn').style.display = 'none';
+            document.getElementById('masterBtn').style.display = 'flex';
+            toast.innerText = "👆 암기 모드 (터치하여 확인)";
+            setTimeout(() => toast.style.opacity = 0, 1500); 
+        }
+    };
+
+    function handleSelection() {
+        if(!isMarkingMode) return;
+        const selection = window.getSelection();
+        const text = selection.toString().trim();
+        const saveBtn = document.getElementById('saveMarkBtn');
+        const masterBtn = document.getElementById('masterBtn');
+        
+        if(text.length > 0 && selection.anchorNode.parentElement.closest('.verse-text')) {
+            selectedText = text;
+            saveBtn.style.display = 'flex';
+            masterBtn.style.display = 'none'; 
+        } else {
+            selectedText = "";
+            saveBtn.style.display = 'none';
+            masterBtn.style.display = 'flex';
+        }
+    }
+
+    window.saveMark = function() {
+        if(!selectedText) return;
+        const selection = window.getSelection();
+        const verseNode = selection.anchorNode.parentElement.closest('.verse-card');
+        if(!verseNode) return;
+        const absoluteVIdx = verseNode.getAttribute('data-v-idx'); 
+        if(absoluteVIdx !== null) {
+            Storage.add(currentChapter, absoluteVIdx, selectedText);
+            selection.removeAllRanges();
+            selectedText = "";
+            document.getElementById('saveMarkBtn').style.display = 'none';
+            document.getElementById('masterBtn').style.display = 'flex';
+            load(currentChapter); 
+        }
+    };
+
+    window.deleteMark = function(el, vIdx, text) {
+        if(!isMarkingMode) return;
+        event.stopPropagation();
+        if(confirm(`'${text}' 마킹을 삭제하시겠습니까?`)) {
+            Storage.remove(currentChapter, vIdx, text);
+            load(currentChapter);
+        }
+    };
+
+    function load(ch, mode = 'top') {
+        if(!db[ch]) return;
+        currentChapter = ch; 
+        document.querySelectorAll('.ch-btn').forEach((b,i)=>b.classList.toggle('active', i+1===ch));
+        
+        const main = document.getElementById('content');
+        const subNav = document.getElementById('subNav');
+        main.innerHTML = ''; subNav.innerHTML = '';
+        const savedMarks = Storage.get();
+        
+        db[ch].sections.forEach((s, idx) => {
+            const sb = document.createElement('button');
+            sb.className = 'sub-btn'; sb.innerText = s.t;
+            sb.onclick = () => { 
+                isAutoScrolling = true;
+                currentSecIndex = idx;
+                updateActiveButton(idx);
+                document.getElementById('s'+idx).scrollIntoView({behavior:'smooth', block:'start'});
+                setTimeout(() => isAutoScrolling = false, 800); 
+            };
+            subNav.appendChild(sb);
+
+            const grp = document.createElement('div');
+            grp.className = 'section-group'; grp.id = 's'+idx;
+            
+            grp.innerHTML = `
+                <div class="sec-header">
+                    <div class="sec-btn-group">
+                        <span class="pill-badge info">${s.r}</span>
+                        <button class="pill-badge eye-btn" onclick="toggleAll(this)"><span>👁️</span></button>
+                    </div>
+                    <span class="sec-title-text">${s.t}</span>
+                </div>`;
+            
+            s.v.forEach((v, vIdx) => {
+                const card = document.createElement('div');
+                card.className = isMarkingMode ? 'verse-card' : 'verse-card hidden';
+                card.onclick = function() {
+                    if(isMarkingMode) return; 
+                    this.classList.toggle('hidden'); 
+                };
+                card.setAttribute('data-v-idx', v.n); 
+                let displayTxt = v.t;
+                const marks = savedMarks[`${ch}-${v.n}`]; 
+                if(marks && marks.length > 0) {
+                    marks.forEach(markTxt => {
+                        const regex = new RegExp(`(${markTxt})`, 'g');
+                        displayTxt = displayTxt.replace(regex, `<span class="user-mark" onclick="deleteMark(this, ${v.n}, '${markTxt}')">$1</span>`);
+                    });
+                }
+                card.innerHTML = `<div class="v-num">${v.n}</div><div class="verse-text">${displayTxt}</div>`;
+                grp.appendChild(card);
+            });
+            main.appendChild(grp);
+        });
+        
+        if(observer) observer.disconnect();
+        observer = new IntersectionObserver((entries) => {
+            if(isAutoScrolling) return; 
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    currentSecIndex = parseInt(entry.target.id.replace('s', ''));
+                    document.querySelectorAll('.sub-btn').forEach((btn, i) => {
+                        btn.classList.toggle('active-sub', i === currentSecIndex);
+                    });
+                }
+            });
+        }, {rootMargin:'-40% 0px -40% 0px'}); 
+        document.querySelectorAll('.section-group').forEach(group => observer.observe(group));
+        
+        if(mode === 'bottom') {
+            window.scrollTo(0, document.body.scrollHeight);
+            currentSecIndex = db[ch].sections.length - 1;
+        } else {
+            window.scrollTo(0, 0);
+            currentSecIndex = 0;
+        }
+        
+        const mBtn = document.getElementById('masterBtn');
+        const pc = mBtn.querySelector('.pc-text');
+        const mo = mBtn.querySelector('.mobile-text');
+        pc.innerText = `👁️ ${ch}장 전체보기`;
+        mo.innerText = `👁️ 전체보기`;
+    }
+
+    function moveSection(dir) {
+        const sections = document.querySelectorAll('.section-group');
+        let nextIdx = currentSecIndex + dir;
+
+        isAutoScrolling = true;
+
+        if (nextIdx < 0) {
+            if (currentChapter > 1) load(currentChapter - 1, 'bottom');
+        } else if (nextIdx >= sections.length) {
+            if (currentChapter < 22) load(currentChapter + 1, 'top');
+        } else {
+            currentSecIndex = nextIdx;
+            sections[nextIdx].scrollIntoView({behavior:'smooth', block:'start'});
+            updateActiveButton(nextIdx);
+        }
+        setTimeout(() => isAutoScrolling = false, 800);
+    }
+
+    function openSearch() { document.getElementById('searchModal').style.display = 'flex'; setTimeout(()=>document.getElementById('searchInput').focus(),100); }
+    function closeSearch() { document.getElementById('searchModal').style.display = 'none'; }
+    
+    function doSearch() {
+        const rawQuery = document.getElementById('searchInput').value.trim();
+        if(!rawQuery) return;
+        
+        const query = rawQuery.replace(/\s+/g,''); 
+        const resBox = document.getElementById('searchResults');
+        
+        resBox.innerHTML = '';
+        let count = 0, html = '';
+        
+        for(let ch=1; ch<=22; ch++){
+            if(!db[ch]) continue;
+            db[ch].sections.forEach((sec,sIdx)=>{
+                sec.v.forEach((v,vIdx)=>{
+                    if(v.t.replace(/\s+/g,'').includes(query)){
+                        count++;
+                        const regex = new RegExp(`(${rawQuery})`, 'gi');
+                        const highlightedText = v.t.replace(regex, '<span class="res-highlight">$1</span>');
+                        
+                        html += `<div class="result-card" onclick="jumpToResult(${ch},${sIdx},${vIdx})">
+                            <div class="res-info">계${ch}:${v.n} (${sec.t})</div>
+                            <div class="res-text">${highlightedText}</div>
+                        </div>`;
+                    }
+                });
+            });
+        }
+        document.getElementById('searchStatusBox').style.display = 'block';
+        document.getElementById('searchCount').innerHTML = `총 <b>${count}</b>건 검색 <span class="status-badge" style="margin-left:8px;">👆 클릭 시 해당 위치로 이동</span>`;
+        resBox.innerHTML = html || '<div style="text-align:center;padding:20px;">결과 없음</div>';
+    }
+
+    window.jumpToResult = function(ch, sIdx, vIdx) {
+        closeSearch();
+        isMarkingMode = false;
+        document.body.classList.remove('mode-marking');
+        document.body.classList.add('mode-memorize');
+        document.getElementById('editModeBtn').classList.remove('active');
+        
+        load(ch);
+        setTimeout(()=>{
+            const allCards = document.querySelectorAll('.verse-card');
+            allCards.forEach(c=>c.classList.remove('hidden'));
+            
+            const targetSec = document.getElementById('s'+sIdx);
+            if(targetSec){
+                const targetCard = targetSec.querySelectorAll('.verse-card')[vIdx];
+                if(targetCard){
+                    targetCard.scrollIntoView({behavior:'smooth', block:'center'});
+                    targetCard.classList.add('highlight-match');
+                    setTimeout(()=>targetCard.classList.remove('highlight-match'), 2000);
+                }
+            }
+        },100);
+    }
+
     window.toggleAll = function(btn) {
+        if(isMarkingMode) return;
         const group = btn.closest('.section-group');
         const cards = group.querySelectorAll('.verse-card');
         let hasHidden = Array.from(cards).some(c => c.classList.contains('hidden'));
         cards.forEach(c => c.classList.toggle('hidden', !hasHidden));
-        
-        const icon = hasHidden ? "🙈" : "👁️";
-        const text = hasHidden ? "숨김" : "보기";
-        btn.innerHTML = `<span class="mobile-text">${icon}</span><span class="pc-text">${text}</span>`;
     };
 
     window.toggleChapter = function() {
+        if(isMarkingMode) return;
         const allCards = document.querySelectorAll('.verse-card');
         let hasHidden = Array.from(allCards).some(c => c.classList.contains('hidden'));
         allCards.forEach(c => c.classList.toggle('hidden', !hasHidden));
@@ -314,7 +593,6 @@
         const mBtn = document.getElementById('masterBtn');
         const pc = mBtn.querySelector('.pc-text');
         const mo = mBtn.querySelector('.mobile-text');
-        
         if(hasHidden) {
             pc.innerText = `🙈 ${currentChapter}장 전체숨김`;
             mo.innerText = `🙈 전체숨김`;
@@ -322,125 +600,15 @@
             pc.innerText = `👁️ ${currentChapter}장 전체보기`;
             mo.innerText = `👁️ 전체보기`;
         }
-        
-        document.querySelectorAll('.section-group .pill-badge').forEach(btn => {
-            if(btn.classList.contains('info')) return;
-            const icon = hasHidden ? "🙈" : "👁️";
-            const text = hasHidden ? "숨김" : "보기";
-            btn.innerHTML = `<span class="mobile-text">${icon}</span><span class="pc-text">${text}</span>`;
-        });
     };
 
     function updateActiveButton(idx) {
         document.querySelectorAll('.sub-btn').forEach((btn, i) => {
             btn.classList.toggle('active-sub', i === idx);
-            if(i === idx) btn.scrollIntoView({behavior: 'smooth', inline: 'center', block: 'nearest'});
+            if(i === idx && isAutoScrolling) {
+                btn.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
+            }
         });
-    }
-
-    function setupObserver() {
-        if(observer) observer.disconnect();
-        observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    currentSecIndex = parseInt(entry.target.id.replace('s', ''));
-                    updateActiveButton(currentSecIndex);
-                }
-            });
-        }, { rootMargin: '-40% 0px -40% 0px' });
-        document.querySelectorAll('.section-group').forEach(group => observer.observe(group));
-    }
-
-    function load(ch, startAtEnd = false) {
-        if(!db[ch]) {
-            // [데이터 없음 처리]
-            const main = document.getElementById('content');
-            const subNav = document.getElementById('subNav');
-            main.innerHTML = `<div style="text-align:center; padding:50px; color:var(--text-sub);">
-                <h3>🚧 데이터 로딩 중...</h3>
-                <p>아직 ${ch}장 데이터가 입력되지 않았습니다.<br>곧 업데이트 될 예정입니다.</p>
-            </div>`;
-            subNav.innerHTML = '';
-            
-            document.querySelectorAll('.ch-btn').forEach((b,i)=>b.classList.toggle('active', i+1===ch));
-            const mBtn = document.getElementById('masterBtn');
-            mBtn.querySelector('.pc-text').innerText = `👁️ ${ch}장 (준비중)`;
-            mBtn.querySelector('.mobile-text').innerText = `👁️ 준비중`;
-            currentChapter = ch;
-            return;
-        }
-
-        currentChapter = ch; 
-        document.querySelectorAll('.ch-btn').forEach((b,i)=>b.classList.toggle('active', i+1===ch));
-        
-        const main = document.getElementById('content');
-        const subNav = document.getElementById('subNav');
-        main.innerHTML = ''; subNav.innerHTML = '';
-        
-        db[ch].sections.forEach((s, idx) => {
-            const sb = document.createElement('button');
-            sb.className = 'sub-btn'; sb.innerText = s.t;
-            sb.onclick = () => { 
-                currentSecIndex = idx;
-                updateActiveButton(idx);
-                document.getElementById('s'+idx).scrollIntoView({behavior:'smooth', block:'center'}); 
-            };
-            subNav.appendChild(sb);
-
-            const grp = document.createElement('div');
-            grp.className = 'section-group'; grp.id = 's'+idx;
-            const cleanRange = s.r.replace(/절/g, ''); 
-
-            grp.innerHTML = `
-                <div class="sec-header">
-                    <span class="sec-title-text">${s.t}</span>
-                    <div class="sec-btn-group">
-                        <button class="pill-badge" onclick="toggleAll(this)">
-                            <span class="mobile-text">👁️</span><span class="pc-text">보기</span>
-                        </button>
-                        <span class="pill-badge info">${cleanRange}절</span>
-                    </div>
-                </div>`;
-            
-            s.v.forEach(v => {
-                const card = document.createElement('div');
-                card.className = 'verse-card hidden'; 
-                card.onclick = function() { this.classList.toggle('hidden'); };
-                card.innerHTML = `<div class="v-num">${v.n}</div><div class="verse-text">${v.t}</div>`;
-                grp.appendChild(card);
-            });
-            main.appendChild(grp);
-        });
-        setTimeout(setupObserver, 200);
-        window.scrollTo(0, startAtEnd ? document.body.scrollHeight : 0);
-        
-        const mBtn = document.getElementById('masterBtn');
-        mBtn.querySelector('.pc-text').innerText = `👁️ ${ch}장 전체보기`;
-        mBtn.querySelector('.mobile-text').innerText = `👁️ 전체보기`;
-    }
-
-    function move(dir) {
-        const sections = document.querySelectorAll('.section-group');
-        if(!sections.length) {
-            // 데이터가 없는 장에서 이동 시도 시
-            if(dir === 1 && currentChapter < 22) load(currentChapter + 1);
-            if(dir === -1 && currentChapter > 1) load(currentChapter - 1);
-            return;
-        }
-
-        let nextIndex = currentSecIndex + dir;
-        if (nextIndex >= sections.length) {
-            if (currentChapter < 22) load(currentChapter + 1);
-            return;
-        }
-        if (nextIndex < 0) {
-            if (currentChapter > 1) load(currentChapter - 1, true);
-            return;
-        }
-        
-        currentSecIndex = nextIndex;
-        updateActiveButton(nextIndex);
-        sections[nextIndex].scrollIntoView({behavior:'smooth', block:'center'});
     }
 
     init();
@@ -450,7 +618,6 @@
 (function(){
     const d = window.addBibleData;
     if(!d) return;
-
     // [1장]
     d(1,{sections:[
         {t:"계시록 전장의 요약",r:"1~3",v:[
