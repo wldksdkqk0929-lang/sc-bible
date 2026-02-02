@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>순천 교육부 천국고시 암기 시스템 (V7.7 Fix)</title>
+    <style>
+        :root {
+            /* [Day Mode] - 유지 */
+            --bg-gradient: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            --glass-card-bg: rgba(255, 255, 255, 0.65); 
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --glass-header: rgba(255, 255, 255, 0.3);
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --text-main: #2d3436; 
+            --text-sub: #58636d;
+            --text-num: #764ba2;
+            --shadow-soft: 0 8px 32px 0 rgba(31, 38, 135, 0.10);
+            --btn-base: rgba(255,255,255,0.4);
+            --btn-active-text: #fff;
+            --pill-badge-bg: var(--primary-gradient);
+            --pill-text: #fff;
+            --watermark-opacity: 0.04;
+        }
+
+        /* [Night Mode: Deep Muted & Copper] - 유지 */
+        [data-theme="dark"] {
+            --bg-gradient: linear-gradient(135deg, #1a1e26 0%, #2d3436 100%);
+            --glass-card-bg: rgba(30, 34, 40, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-header: rgba(26, 30, 38, 0.8);
+            --primary-gradient: linear-gradient(135deg, #C2935A 0%, #A67C49 100%);
+            --text-main: #A6AFB7; 
+            --text-sub: #606A74;
+            --text-num: #C2935A;
+            --shadow-soft: 0 10px 40px rgba(0, 0, 0, 0.5);
+            --btn-base: rgba(255, 255, 255, 0.05);
+            --btn-active-text: #1a1e26;
+            --pill-badge-bg: var(--primary-gradient);
+            --pill-text: #1a1e26;
+            --watermark-opacity: 0.04;
+        }
+
+        body {
+            margin: 0; 
+            background-image: var(--bg-gradient);
+            background-attachment: fixed; background-size: 400% 400%;
+            color: var(--text-main);
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-user-select: none; user-select: none;
+            overflow-x: hidden; padding-bottom: 140px;
+            animation: gradientBG 15s ease infinite;
+            transition: color 0.4s, background-image 0.6s;
+        }
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* [수리완료 1] 워터마크: 최상위 레이어(9999) + 터치 투과(none) */
+        .watermark {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 9999; 
+            opacity: var(--watermark-opacity);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Ctext x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' transform='rotate(-45 150 150)' fill='%232c3e50' font-size='18' font-weight='bold' font-family='sans-serif'%3E순천 교육부 천국고시 준비자료%3C/text%3E%3C/svg%3E");
+        }
+        [data-theme="dark"] .watermark { filter: invert(0.8); }
+
+        header {
+            position: sticky; top: 0; z-index: 1000;
+            background: var(--glass-header);
+            border-bottom: 1px solid var(--glass-border);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            display: flex; flex-direction: column;
+            transition: background 0.3s;
+        }
+
+        .theme-toggle {
+            position: absolute; top: 12px; right: 15px;
+            width: 36px; height: 36px;
+            border-radius: 50%; border: 1px solid var(--glass-border);
+            background: var(--glass-card-bg);
+            color: var(--text-main);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            z-index: 1001; transition: 0.3s;
+        }
+
+        .row-chapters { 
+            padding: 12px 15px; display: flex; gap: 8px; 
+            overflow-x: auto; scrollbar-width: none; 
+            flex-wrap: nowrap; padding-right: 60px; 
+        }
+        .row-chapters::-webkit-scrollbar { display: none; }
+        
+        .ch-btn {
+            flex-shrink: 0;
+            background: var(--btn-base); 
+            border: 1px solid var(--glass-border); border-radius: 12px;
+            padding: 8px 16px; font-size: 15px; font-weight: 700; color: var(--text-sub);
+            cursor: pointer; transition: 0.3s;
+        }
+        .ch-btn.active {
+            background: var(--primary-gradient); 
+            color: var(--btn-active-text); border: 1px solid transparent;
+            box-shadow: 0 4px 12px rgba(0,0,0, 0.1);
+            transform: scale(1.05);
+        }
+
+        .row-subs {
+            padding: 10px 15px; display: flex; gap: 8px; 
+            overflow-x: auto; border-bottom: 1px solid var(--glass-border); scrollbar-width: none;
+        }
+        .sub-btn {
+            flex-shrink: 0;
+            background: var(--btn-base); 
+            border: 1px solid var(--glass-border); color: var(--text-sub);
+            border-radius: 12px; padding: 6px 16px; font-size: 13px; font-weight: 600;
+            cursor: pointer; transition: 0.2s;
+        }
+        .sub-btn.active-sub { 
+            background: var(--primary-gradient); color: var(--btn-active-text);
+            border-color: transparent;
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        main { width: 100%; max-width: 1200px; margin: 0 auto; padding: 20px 15px; box-sizing: border-box; }
+
+        .section-group {
+            scroll-margin-top: 150px; margin-bottom: 25px;
+            background: var(--glass-card-bg); 
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px; 
+            box-shadow: var(--shadow-soft);
+            overflow: hidden; 
+            transition: background 0.3s, border 0.3s;
+        }
+
+        .sec-header {
+            background: rgba(0,0,0,0.03); 
+            border-bottom: 1px solid var(--glass-border);
+            padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center; gap: 15px;
+        }
+        
+        .sec-title-text {
+            flex: 1; font-size: 18px; font-weight: 800;
+            background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        .sec-btn-group { flex-shrink: 0; display: flex; align-items: center; gap: 8px; }
+
+        .pill-badge {
+            background: var(--pill-badge-bg);
+            color: var(--pill-text); padding: 6px 12px; border-radius: 18px;
+            font-size: 12px; font-weight: 700; border: none; cursor: pointer;
+            display: flex; align-items: center; gap: 4px; white-space: nowrap;
+        }
+        .pill-badge.info { 
+            background: rgba(128,128,128,0.1); color: var(--text-sub); cursor: default; 
+        }
+
+        /* [수리완료 2] Verse-Flex 시스템 도입 */
+        .verse-card {
+            display: flex; 
+            align-items: flex-start; /* 숫자와 본문 상단 정렬 */
+            gap: 15px;
+            padding: 20px; 
+            border-bottom: 1px solid var(--glass-border);
+            line-height: 1.75; font-size: 17px; cursor: pointer;
+            position: relative;
+        }
+        .verse-card:last-child { border-bottom: none; }
+        
+        .v-num { 
+            flex-shrink: 0; 
+            min-width: 30px; /* 숫자 영역 고정 */
+            font-weight: 900;
+            color: var(--text-num); text-align: right; margin-top: 2px;
+        }
+        
+        /* 텍스트 영역: 마스크의 기준점 */
+        .verse-text { 
+            flex-grow: 1; 
+            color: var(--text-main); font-weight: 500; 
+            transition: opacity 0.3s; word-break: keep-all; 
+            position: relative; /* 중요: 마스크 오버레이 기준 */
+        }
+        
+        /* 숨김 상태: 텍스트를 투명하게 처리 (공간은 유지) */
+        .hidden .verse-text { 
+            color: transparent; 
+            user-select: none;
+        }
+
+        /* 마스크 오버레이: 텍스트 위에 정확히 덮어씌움 */
+        .hidden .verse-text::before {
+            content: "👆 터치하여 확인";
+            position: absolute;
+            top: 0; left: 0; 
+            color: var(--text-num); 
+            font-weight: bold; opacity: 0.8;
+            /* 애니메이션 */
+            animation: pulseText 2s infinite;
+        }
+        
+        @keyframes pulseText { 
+            0% { opacity: 0.5; } 
+            50% { opacity: 1; } 
+            100% { opacity: 0.5; } 
+        }
+
+        .dock-container {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            z-index: 2000; width: 95%; max-width: 400px;
+        }
+        .nav-dock {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 20px; gap: 10px;
+            background: var(--glass-card-bg);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border); border-radius: 60px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            transition: background 0.3s;
+        }
+        .arrow-btn {
+            width: 48px; height: 48px; 
+            background: var(--btn-base); color: var(--text-num);
+            border: 1px solid var(--glass-border); border-radius: 50%; font-size: 20px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+        }
+        .master-btn {
+            flex: 1; height: 44px; 
+            background: var(--primary-gradient); color: var(--pill-text);
+            border: none; border-radius: 22px;
+            font-size: 14px; font-weight: 700; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .pc-text { display: none; }
+        .mobile-text { display: inline-block; }
+
+        @media (min-width: 768px) {
+            .mobile-text { display: none; }
+            .pc-text { display: inline-block; }
+            main { padding: 40px; }
+            .row-chapters { justify-content: center; padding-right: 15px; }
+            .row-subs { justify-content: center; }
+            .verse-card { font-size: 20px; padding: 25px 30px; }
+            .master-btn { padding: 0 40px; flex: none; }
+            .theme-toggle { top: 20px; right: 30px; }
+        }
+    </style>
+</head>
+<body oncontextmenu="return false">
+    <div class="watermark"></div>
+    <header>
+        <button class="theme-toggle" onclick="toggleTheme()" title="모드 전환">🌙</button>
+        <div class="row-chapters" id="chNav"></div>
+        <div class="row-subs" id="subNav"></div>
+    </header>
+    <main id="content"></main>
+    <div class="dock-container">
+        <div class="nav-dock">
+            <button class="arrow-btn" onclick="move(-1)">❮</button>
+            <button id="masterBtn" class="master-btn" onclick="toggleChapter()">
+                <span class="pc-text">👁️ 1장 전체보기</span>
+                <span class="mobile-text">👁️ 전체보기</span>
+            </button>
+            <button class="arrow-btn" onclick="move(1)">❯</button>
+        </div>
+    </div>
+
+<script>
+    const db = {}; 
+    window.addBibleData = function(ch, data) {
+        db[ch] = data;
+        if(currentChapter === ch) load(ch);
+    };
+
+    let currentChapter = 1;
+    let currentSecIndex = 0;
+    let observer = null;
+
+    function initTheme() {
+        const savedTheme = localStorage.getItem('theme') || 'light'; 
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        updateThemeIcon(savedTheme);
+    }
+    
+    function updateThemeIcon(theme) {
+        const btn = document.querySelector('.theme-toggle');
+        btn.innerText = theme === 'dark' ? '☀️' : '🌙'; 
+    }
+
+    window.toggleTheme = function() {
+        const doc = document.documentElement;
+        const current = doc.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        doc.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+        updateThemeIcon(next);
+    };
+
+    function init() {
+        initTheme();
+        const nav = document.getElementById('chNav');
+        for(let i=1; i<=22; i++) {
+            const b = document.createElement('button');
+            b.className = `ch-btn ${i===1?'active':''}`;
+            b.innerText = i+'장';
+            b.onclick = () => load(i);
+            nav.appendChild(b);
+        }
+        setTimeout(() => load(1), 100);
+    }
+
+    window.toggleAll = function(btn) {
+        const group = btn.closest('.section-group');
+        const cards = group.querySelectorAll('.verse-card');
+        let hasHidden = Array.from(cards).some(c => c.classList.contains('hidden'));
+        cards.forEach(c => c.classList.toggle('hidden', !hasHidden));
+        
+        const icon = hasHidden ? "🙈" : "👁️";
+        const text = hasHidden ? "숨김" : "보기";
+        btn.innerHTML = `<span class="mobile-text">${icon}</span><span class="pc-text">${text}</span>`;
+    };
+
+    window.toggleChapter = function() {
+        const allCards = document.querySelectorAll('.verse-card');
+        let hasHidden = Array.from(allCards).some(c => c.classList.contains('hidden'));
+        allCards.forEach(c => c.classList.toggle('hidden', !hasHidden));
+        
+        const mBtn = document.getElementById('masterBtn');
+        const pc = mBtn.querySelector('.pc-text');
+        const mo = mBtn.querySelector('.mobile-text');
+        
+        if(hasHidden) {
+            pc.innerText = `🙈 ${currentChapter}장 전체숨김`;
+            mo.innerText = `🙈 전체숨김`;
+        } else {
+            pc.innerText = `👁️ ${currentChapter}장 전체보기`;
+            mo.innerText = `👁️ 전체보기`;
+        }
+        
+        document.querySelectorAll('.section-group .pill-badge').forEach(btn => {
+            if(btn.classList.contains('info')) return;
+            const icon = hasHidden ? "🙈" : "👁️";
+            const text = hasHidden ? "숨김" : "보기";
+            btn.innerHTML = `<span class="mobile-text">${icon}</span><span class="pc-text">${text}</span>`;
+        });
+    };
+
+    function updateActiveButton(idx) {
+        document.querySelectorAll('.sub-btn').forEach((btn, i) => {
+            btn.classList.toggle('active-sub', i === idx);
+            if(i === idx) btn.scrollIntoView({behavior: 'smooth', inline: 'center', block: 'nearest'});
+        });
+    }
+
+    function setupObserver() {
+        if(observer) observer.disconnect();
+        observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    currentSecIndex = parseInt(entry.target.id.replace('s', ''));
+                    updateActiveButton(currentSecIndex);
+                }
+            });
+        }, { rootMargin: '-40% 0px -40% 0px' });
+        document.querySelectorAll('.section-group').forEach(group => observer.observe(group));
+    }
+
+    function load(ch, startAtEnd = false) {
+        if(!db[ch]) return;
+        currentChapter = ch; 
+        document.querySelectorAll('.ch-btn').forEach((b,i)=>b.classList.toggle('active', i+1===ch));
+        
+        const main = document.getElementById('content');
+        const subNav = document.getElementById('subNav');
+        main.innerHTML = ''; subNav.innerHTML = '';
+        
+        db[ch].sections.forEach((s, idx) => {
+            const sb = document.createElement('button');
+            sb.className = 'sub-btn'; sb.innerText = s.t;
+            sb.onclick = () => { 
+                currentSecIndex = idx;
+                updateActiveButton(idx);
+                document.getElementById('s'+idx).scrollIntoView({behavior:'smooth', block:'center'}); 
+            };
+            subNav.appendChild(sb);
+
+            const grp = document.createElement('div');
+            grp.className = 'section-group'; grp.id = 's'+idx;
+            const cleanRange = s.r.replace(/절/g, ''); 
+
+            grp.innerHTML = `
+                <div class="sec-header">
+                    <span class="sec-title-text">${s.t}</span>
+                    <div class="sec-btn-group">
+                        <button class="pill-badge" onclick="toggleAll(this)">
+                            <span class="mobile-text">👁️</span><span class="pc-text">보기</span>
+                        </button>
+                        <span class="pill-badge info">${cleanRange}절</span>
+                    </div>
+                </div>`;
+            
+            s.v.forEach(v => {
+                const card = document.createElement('div');
+                card.className = 'verse-card hidden'; 
+                card.onclick = function() { this.classList.toggle('hidden'); };
+                card.innerHTML = `<div class="v-num">${v.n}</div><div class="verse-text">${v.t}</div>`;
+                grp.appendChild(card);
+            });
+            main.appendChild(grp);
+        });
+        setTimeout(setupObserver, 200);
+        window.scrollTo(0, startAtEnd ? document.body.scrollHeight : 0);
+        
+        const mBtn = document.getElementById('masterBtn');
+        mBtn.querySelector('.pc-text').innerText = `👁️ ${ch}장 전체보기`;
+        mBtn.querySelector('.mobile-text').innerText = `👁️ 전체보기`;
+    }
+
+    function move(dir) {
+        const sections = document.querySelectorAll('.section-group');
+        let nextIndex = currentSecIndex + dir;
+        if (nextIndex >= sections.length && currentChapter < 22) { load(currentChapter + 1); return; }
+        if (nextIndex < 0 && currentChapter > 1) { load(currentChapter - 1, true); return; }
+        if (sections[nextIndex]) {
+            currentSecIndex = nextIndex;
+            updateActiveButton(nextIndex);
+            sections[nextIndex].scrollIntoView({behavior:'smooth', block:'center'});
+        }
+    }
+
+    init();
+</script>
+
+<script>
+    // [테스트 데이터: 계시록 1장]
+    window.addBibleData(1,{sections:[
+        {t:"계시록 전장의 요약",r:"1~3",v:[
+            {n:1,t:"예수 그리스도의 계시라 이는 하나님이 그에게 주사 반드시 속히 될 일을 그 종들에게 보이시려고 그 천사를 그 종 요한에게 보내어 지시하신 것이라"},
+            {n:2,t:"요한은 하나님의 말씀과 예수 그리스도의 증거 곧 자기의 본 것을 다 증거하였느니라"},
+            {n:3,t:"이 예언의 말씀을 읽는 자와 듣는 자들과 그 가운데 기록한 것을 지키는 자들이 복이 있나니 때가 가까움이라"}
+        ]},
+        {t:"하나님 나라와 제사장",r:"4~6",v:[
+            {n:4,t:"요한은 아시아에 있는 일곱 교회에 편지하노니 이제도 계시고 전에도 계시고 장차 오실 이와 그 보좌 앞에 일곱 영과"},
+            {n:5,t:"또 충성된 증인으로 죽은 자들 가운데서 먼저 나시고 땅의 임금들의 머리가 되신 예수 그리스도로 말미암아 은혜와 평강이 너희에게 있기를 원하노라 우리를 사랑하사 그의 피로 우리 죄에서 우리를 해방하시고"},
+            {n:6,t:"그 아버지 하나님을 위하여 우리를 나라와 제사장으로 삼으신 그에게 영광과 능력이 세세토록 있기를 원하노라 아멘"}
+        ]},
+        {t:"구름타고 오시는 예수님과 알파와 오메가",r:"7~8",v:[
+            {n:7,t:"볼찌어다 구름을 타고 오시리라 각인의 눈이 그를 보겠고 그를 찌른 자들도 볼터이요 땅에 있는 모든 족속이 그를 인하여 애곡하리니 그러하리라 아멘"},
+            {n:8,t:"주 하나님이 가라사대 나는 알파와 오메가라 이제도 있고 전에도 있었고 장차 올 자요 전능한 자라 하시더라"}
+        ]}
+    ]});
+</script>
+</body>
+</html>
