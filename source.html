@@ -1358,9 +1358,9 @@
         --btn-check-text: #ffffff;   
     }
 
-    /* 2. [V16.0] 시험 모드 버튼 (반응형 최적화) */
+    /* 2. [V16.0] 시험 모드 버튼 (모바일 최적화) */
     #testToggleBtn {
-        margin-left: 8px; /* 간격 축소 */
+        margin-left: 8px;
         background: var(--primary-gradient);
         border: 1px solid rgba(255,255,255,0.2);
         padding: 8px 16px;
@@ -1372,8 +1372,6 @@
         font-size: 15px;
         z-index: 9999;
         transition: transform 0.2s;
-        
-        /* 텍스트 줄바꿈 방지 */
         white-space: nowrap; 
     }
     #testToggleBtn:active { transform: scale(0.95); }
@@ -1382,21 +1380,15 @@
         box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);
     }
 
-    /* [핵심] 모바일 화면(폭 600px 이하)에서는 글자를 숨김 */
+    /* 모바일에서는 글자 숨김 */
     @media (max-width: 600px) {
-        #testToggleBtn {
-            padding: 8px 10px; /* 좌우 여백 줄임 */
-            font-size: 18px;   /* 아이콘은 좀 더 크게 */
-        }
-        /* span 태그로 감싼 텍스트만 숨김 처리할 예정 */
-        #testToggleBtn span.btn-text {
-            display: none;
-        }
+        #testToggleBtn { padding: 8px 10px; font-size: 18px; }
+        #testToggleBtn span.btn-text { display: none; }
     }
     
     #versionBadge {
         position: fixed; bottom: 5px; right: 5px;
-        background: rgba(0,0,0,0.6); color: #81ecec;
+        background: rgba(0,0,0,0.6); color: #fdcb6e; /* 원숭이 색상(노랑) */
         padding: 3px 8px; border-radius: 6px; font-size: 11px;
         z-index: 10000; pointer-events: none;
         backdrop-filter: blur(4px);
@@ -1477,21 +1469,48 @@
 
 <script>
     window.addEventListener('load', function() {
+        // [V16.1] 버전 배지
         const vBadge = document.createElement('div');
         vBadge.id = 'versionBadge';
-        vBadge.innerText = 'V16.0 Mobile Optimized';
+        vBadge.innerText = 'System V16.1 (Monkey Fix)';
         document.body.appendChild(vBadge);
 
         // [V15.5] 장 이동 안전장치
         if (typeof window.load === 'function' && !window.originalLoad) {
             window.originalLoad = window.load; 
             window.load = function(ch, mode) {
-                if (typeof isTestMode !== 'undefined' && isTestMode) {
-                    toggleTestMode(); 
-                }
+                if (typeof isTestMode !== 'undefined' && isTestMode) toggleTestMode(); 
                 window.originalLoad(ch, mode); 
             };
         }
+
+        // [V16.1 핵심] 소단락 눈 버튼(원숭이) 기능 복구
+        // 페이지 내의 모든 작은 눈 버튼을 찾아 클릭 이벤트 재정의
+        // (기존 HTML의 onclick 속성보다 이 코드가 강력하게 작동하도록 설정)
+        window.toggleSection = function(btn) {
+            // 버튼의 부모(헤더)를 찾고 그 다음 형제(내용)를 찾음
+            const header = btn.closest('div') || btn.parentElement; 
+            // 헤더 바로 다음 요소가 내용(content)이라고 가정
+            let content = header.nextElementSibling;
+            
+            // 혹시 텍스트 노드 등이 끼어있을 경우를 대비해 요소 노드 찾기
+            while(content && content.nodeType !== 1) {
+                content = content.nextElementSibling;
+            }
+
+            if(content) {
+                // 현재 상태 확인 (안 보이면 hidden 상태)
+                const isHidden = content.style.display === 'none';
+                
+                if (isHidden) {
+                    content.style.display = 'block'; // 보여주기
+                    btn.innerText = '👁️';           // 아이콘: 눈 (보고 있음)
+                } else {
+                    content.style.display = 'none';  // 숨기기
+                    btn.innerText = '🙈';            // 아이콘: 원숭이 (안 봄/숨김)
+                }
+            }
+        };
 
         const header = document.querySelector('.control-island') || document.querySelector('header');
         if (document.getElementById('testToggleBtn')) return;
@@ -1499,10 +1518,8 @@
         const toggleBtn = document.createElement('button');
         toggleBtn.id = 'testToggleBtn';
         toggleBtn.type = 'button';
-        
-        // [V16.0] 모바일 대응을 위해 HTML 구조 변경 (텍스트를 span으로 감쌈)
+        // [V16.0] 모바일 버튼 최적화 (HTML 구조)
         toggleBtn.innerHTML = '📝 <span class="btn-text">시험 모드</span>';
-        
         toggleBtn.onclick = toggleTestMode;
         header.appendChild(toggleBtn);
     });
@@ -1525,7 +1542,6 @@
         }
 
         if (isTestMode) {
-            // [ON] 종료 버튼으로 변경 (텍스트 숨김 로직 유지)
             btn.innerHTML = '❌ <span class="btn-text">종료</span>';
             btn.classList.add('active');
             if(typeof isMarkingMode !== 'undefined' && isMarkingMode) toggleEditMode();
@@ -1559,7 +1575,6 @@
             });
             
         } else {
-            // [OFF] 원래 버튼으로 복귀
             btn.innerHTML = '📝 <span class="btn-text">시험 모드</span>';
             btn.classList.remove('active');
             
@@ -1579,11 +1594,11 @@
     function escapeText(text) { return text.replace(/`/g, "").replace(/"/g, "&quot;").replace(/\n/g, " "); }
 
     // ===========================
-    // Core 2. 마이크 (V15.5 안정화 로직)
+    // Core 2. 마이크 (V15.5 안정화)
     // ===========================
     function startStt(btnElement) {
         if (/Android|iPhone|iPad/i.test(navigator.userAgent) && location.protocol === 'file:') {
-            alert("⛔ [보안 경고]\n모바일에서 '내 파일'로 열면 마이크가 차단됩니다.\n\nHTTPS 주소(깃허브 등)로 접속해주세요.");
+            alert("⛔ [보안 경고]\n모바일에서 '내 파일'로 열면 마이크가 차단됩니다.\n\nHTTPS 주소로 접속해주세요.");
             return;
         }
 
@@ -1638,9 +1653,7 @@
                     b.innerHTML = "<span>🎙️</span> 음성 입력";
                 });
                 recognition = null;
-                if(event.error === 'not-allowed') {
-                    alert("마이크 권한이 거부되었습니다.");
-                }
+                if(event.error === 'not-allowed') alert("마이크 권한이 거부되었습니다.");
             };
             
             recognition.start();
