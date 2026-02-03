@@ -1358,16 +1358,14 @@
         --btn-check-text: #ffffff;   
     }
 
-    /* [V16.3 통합] 모바일 스크롤 안전 영역 확보 (CSS 정석) */
-    /* 사령관님의 조언대로 JS 없이 CSS로 공간을 강제 확보합니다. */
-    @media (max-width: 600px) {
+    /* [V16.5] 스크롤 안전 영역 대폭 확장 (폴드/태블릿/모바일 통합) */
+    @media (max-width: 1200px) {
         .row-chapters, #chNav {
-            /* 22장이 가리지 않도록 우측에 충분한 여백을 줍니다 */
-            padding-right: calc(260px + env(safe-area-inset-right)) !important;
+            padding-right: calc(340px + env(safe-area-inset-right)) !important;
         }
     }
 
-    /* 2. [V16.0] 시험 모드 버튼 (모바일 최적화) */
+    /* 2. [V16.0] 시험 모드 버튼 */
     #testToggleBtn {
         margin-left: 8px;
         background: var(--primary-gradient);
@@ -1389,7 +1387,7 @@
         box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);
     }
 
-    /* 모바일에서는 글자 숨김 */
+    /* 모바일(폰)에서는 글자 숨김 */
     @media (max-width: 600px) {
         #testToggleBtn { padding: 8px 10px; font-size: 18px; }
         #testToggleBtn span.btn-text { display: none; }
@@ -1397,7 +1395,7 @@
     
     #versionBadge {
         position: fixed; bottom: 5px; right: 5px;
-        background: rgba(0,0,0,0.6); color: #ff9ff3; /* 통합 완료(핑크) */
+        background: rgba(0,0,0,0.6); color: #fab1a0; /* 라스트 댄스(살구색) */
         padding: 3px 8px; border-radius: 6px; font-size: 11px;
         z-index: 10000; pointer-events: none;
         backdrop-filter: blur(4px);
@@ -1478,12 +1476,13 @@
 
 <script>
     window.addEventListener('load', function() {
+        // [V17.0] 버전 배지
         const vBadge = document.createElement('div');
         vBadge.id = 'versionBadge';
-        vBadge.innerText = 'V16.4 Integrated';
+        vBadge.innerText = 'V17.0 Last Dance';
         document.body.appendChild(vBadge);
 
-        // [V15.5] 장 이동 안전장치 (시험 모드 중 이동 시 자동 종료)
+        // [V15.5] 장 이동 안전장치
         if (typeof window.load === 'function' && !window.originalLoad) {
             window.originalLoad = window.load; 
             window.load = function(ch, mode) {
@@ -1492,29 +1491,62 @@
             };
         }
 
-        // [V16.4 핵심] 원숭이 아이콘 로직 재설계 (강력한 상태 감지)
+        // ============================================
+        // [V17.0 핵심] 원숭이 아이콘 강력 초기화 & 기능
+        // ============================================
+        
+        // 1. 토글 함수 정의 (안전성 강화)
         window.toggleSection = function(btn) {
-            // 버튼의 부모(Header Div)를 찾습니다.
-            const header = btn.parentElement; 
-            // 헤더 바로 다음에 오는 요소(Content Div)를 찾습니다.
-            let content = header.nextElementSibling;
+            // 버튼의 부모(Header) 찾기 (안전을 위해 closest 사용)
+            const header = btn.closest('div') || btn.parentElement;
             
+            // 컨텐츠 찾기 (헤더 바로 다음 형제 요소)
+            let content = header.nextElementSibling;
+            while(content && content.nodeType !== 1) { // 텍스트 노드 건너뛰기
+                content = content.nextElementSibling;
+            }
+
             if(content) {
-                // [중요] 현재 진짜로 보이는지 확인 (CSS 클래스로 보임/숨김 된 경우까지 체크)
-                const currentStyle = content.style.display || window.getComputedStyle(content).display;
+                // 현재 스타일 확인 (CSS Computed Style까지 체크)
+                const currentDisplay = content.style.display || window.getComputedStyle(content).display;
                 
-                if (currentStyle === 'none') {
-                    // 안 보이면 -> 보이게 하고 -> 눈 아이콘
+                if (currentDisplay === 'none') {
                     content.style.display = 'block'; 
-                    btn.innerText = '👁️';           
+                    btn.innerText = '👁️'; // 보여줬으니 눈
                 } else {
-                    // 보이면 -> 숨기고 -> 원숭이 아이콘
                     content.style.display = 'none';  
-                    btn.innerText = '🙈';            
+                    btn.innerText = '🙈'; // 숨겼으니 원숭이
                 }
             }
         };
 
+        // 2. [중요] 페이지 로드 시 모든 눈 버튼 상태 강제 동기화 (초기화)
+        // 화면에 있는 모든 'toggleSection'을 호출하는 버튼들을 찾습니다.
+        const allToggleBtns = document.querySelectorAll('button[onclick*="toggleSection"]');
+        
+        allToggleBtns.forEach(btn => {
+            const header = btn.closest('div') || btn.parentElement;
+            let content = header.nextElementSibling;
+            while(content && content.nodeType !== 1) content = content.nextElementSibling;
+
+            if(content) {
+                // 현재 컨텐츠가 숨겨져 있는지 확인
+                const isHidden = (window.getComputedStyle(content).display === 'none');
+                
+                // 상태에 맞춰 아이콘 강제 부착
+                if(isHidden) {
+                    btn.innerText = '🙈'; // 숨김 상태면 원숭이
+                } else {
+                    btn.innerText = '👁️'; // 보임 상태면 눈
+                }
+            }
+        });
+        console.log(`✅ [Unit 2] 원숭이 아이콘 ${allToggleBtns.length}개 초기화 완료`);
+
+
+        // ============================================
+        // 기존 시험 모드 로직 (유지)
+        // ============================================
         const header = document.querySelector('.control-island') || document.querySelector('header');
         if (document.getElementById('testToggleBtn')) return;
 
