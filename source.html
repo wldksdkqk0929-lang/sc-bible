@@ -1760,4 +1760,23 @@
             <div style="margin-top:5px; word-break:break-all;">${htmlBuilder}</div>
         `;
     }
+// ==========================================
+    // [Unit 2] V17.5 iOS 마킹 기능 긴급 패치
+    // ==========================================
+    window.addEventListener('load', function() {
+        // 아이폰에서 버튼 터치 시 텍스트 선택이 풀리는 현상 방지
+        // 화면 전체(body)를 감시하다가 '저장' 버튼을 누르면 개입함
+        document.body.addEventListener('touchstart', function(e) {
+            // 1. 터치한 요소가 버튼이고, 텍스트에 '저장'이나 '🖍'가 들어있는지 확인
+            // (혹시 버튼 안의 span을 눌렀을 경우를 대비해 closest로 버튼을 찾음)
+            const btn = e.target.closest('button');
+            
+            if (btn && (btn.innerText.includes('저장') || btn.innerText.includes('🖍'))) {
+                // 2. [핵심] 브라우저가 선택 영역을 지우려는 동작을 강제로 막음
+                e.preventDefault(); 
+                // 3. 그리고 나서 클릭 함수를 강제로 실행
+                btn.click();
+            }
+        }, { passive: false }); // passive: false 필수
+    });
 </script>
