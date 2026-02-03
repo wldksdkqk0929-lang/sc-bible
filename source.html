@@ -1358,6 +1358,15 @@
         --btn-check-text: #ffffff;   
     }
 
+    /* [V16.3 통합] 모바일 스크롤 안전 영역 확보 (CSS 정석) */
+    /* 사령관님의 조언대로 JS 없이 CSS로 공간을 강제 확보합니다. */
+    @media (max-width: 600px) {
+        .row-chapters, #chNav {
+            /* 22장이 가리지 않도록 우측에 충분한 여백을 줍니다 */
+            padding-right: calc(260px + env(safe-area-inset-right)) !important;
+        }
+    }
+
     /* 2. [V16.0] 시험 모드 버튼 (모바일 최적화) */
     #testToggleBtn {
         margin-left: 8px;
@@ -1388,7 +1397,7 @@
     
     #versionBadge {
         position: fixed; bottom: 5px; right: 5px;
-        background: rgba(0,0,0,0.6); color: #fdcb6e; /* 원숭이 색상(노랑) */
+        background: rgba(0,0,0,0.6); color: #ff9ff3; /* 통합 완료(핑크) */
         padding: 3px 8px; border-radius: 6px; font-size: 11px;
         z-index: 10000; pointer-events: none;
         backdrop-filter: blur(4px);
@@ -1469,13 +1478,12 @@
 
 <script>
     window.addEventListener('load', function() {
-        // [V16.1] 버전 배지
         const vBadge = document.createElement('div');
         vBadge.id = 'versionBadge';
-        vBadge.innerText = 'System V16.1 (Monkey Fix)';
+        vBadge.innerText = 'V16.4 Integrated';
         document.body.appendChild(vBadge);
 
-        // [V15.5] 장 이동 안전장치
+        // [V15.5] 장 이동 안전장치 (시험 모드 중 이동 시 자동 종료)
         if (typeof window.load === 'function' && !window.originalLoad) {
             window.originalLoad = window.load; 
             window.load = function(ch, mode) {
@@ -1484,30 +1492,25 @@
             };
         }
 
-        // [V16.1 핵심] 소단락 눈 버튼(원숭이) 기능 복구
-        // 페이지 내의 모든 작은 눈 버튼을 찾아 클릭 이벤트 재정의
-        // (기존 HTML의 onclick 속성보다 이 코드가 강력하게 작동하도록 설정)
+        // [V16.4 핵심] 원숭이 아이콘 로직 재설계 (강력한 상태 감지)
         window.toggleSection = function(btn) {
-            // 버튼의 부모(헤더)를 찾고 그 다음 형제(내용)를 찾음
-            const header = btn.closest('div') || btn.parentElement; 
-            // 헤더 바로 다음 요소가 내용(content)이라고 가정
+            // 버튼의 부모(Header Div)를 찾습니다.
+            const header = btn.parentElement; 
+            // 헤더 바로 다음에 오는 요소(Content Div)를 찾습니다.
             let content = header.nextElementSibling;
             
-            // 혹시 텍스트 노드 등이 끼어있을 경우를 대비해 요소 노드 찾기
-            while(content && content.nodeType !== 1) {
-                content = content.nextElementSibling;
-            }
-
             if(content) {
-                // 현재 상태 확인 (안 보이면 hidden 상태)
-                const isHidden = content.style.display === 'none';
+                // [중요] 현재 진짜로 보이는지 확인 (CSS 클래스로 보임/숨김 된 경우까지 체크)
+                const currentStyle = content.style.display || window.getComputedStyle(content).display;
                 
-                if (isHidden) {
-                    content.style.display = 'block'; // 보여주기
-                    btn.innerText = '👁️';           // 아이콘: 눈 (보고 있음)
+                if (currentStyle === 'none') {
+                    // 안 보이면 -> 보이게 하고 -> 눈 아이콘
+                    content.style.display = 'block'; 
+                    btn.innerText = '👁️';           
                 } else {
-                    content.style.display = 'none';  // 숨기기
-                    btn.innerText = '🙈';            // 아이콘: 원숭이 (안 봄/숨김)
+                    // 보이면 -> 숨기고 -> 원숭이 아이콘
+                    content.style.display = 'none';  
+                    btn.innerText = '🙈';            
                 }
             }
         };
@@ -1518,7 +1521,6 @@
         const toggleBtn = document.createElement('button');
         toggleBtn.id = 'testToggleBtn';
         toggleBtn.type = 'button';
-        // [V16.0] 모바일 버튼 최적화 (HTML 구조)
         toggleBtn.innerHTML = '📝 <span class="btn-text">시험 모드</span>';
         toggleBtn.onclick = toggleTestMode;
         header.appendChild(toggleBtn);
