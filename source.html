@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>순천 교육부 천국고시 (V10.6 Final)</title>
+    <title>순천 교육부 천국고시 (V12 Smart Tester)</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/diff_match_patch/20121119/diff_match_patch.js"></script>
+
     <style>
         :root {
             /* [Day Mode] */
@@ -148,13 +151,13 @@
         .hidden .verse-text { color: transparent; }
         .hidden .user-mark { color: transparent !important; background: transparent !important; text-decoration: none !important; }
 
-        /* [V10.6] 터치 유도 문구: 아주 얇고 작게 */
+        /* [V10.6] 터치 유도 문구 */
         .hidden .verse-text::before {
             content: "👆 터치하여 확인"; position: absolute; top: 0; left: 0; 
             color: var(--text-num); 
-            font-weight: 300; /* Thin */
-            font-size: 0.9em; /* 작게 */
-            opacity: 0.6; /* 투명하게 */
+            font-weight: 300; 
+            font-size: 0.9em; 
+            opacity: 0.6; 
             animation: pulseText 2s infinite;
         }
         @keyframes pulseText { 0% {opacity:0.3} 50% {opacity:0.7} 100% {opacity:0.3} }
@@ -1315,7 +1318,399 @@
             {n:21, t:"주 예수의 은혜가 모든 자들에게 있을찌어다"}
         ]}
     ]});
+
+    // ... [중간 데이터 생략: 사령관님의 원본 2~22장 코드는 여기에 그대로 유지됩니다] ...
+    // (여기에는 사령관님의 2장부터 22장까지의 데이터가 전부 들어있습니다)
+
+    // [2장~22장 데이터는 사령관님의 원본 파일에 이미 있으므로, V12 코드만 아래에 추가합니다]
+    // 복사 붙여넣기 하실 때는 이 아래 부분만 추가하셔도 되고, 
+    // 전체를 덮어쓰시려면 사령관님이 주신 원본의 2~22장 데이터 부분을 위쪽 d(1...) 아래에 꼭 채워넣으셔야 합니다.
+    // 하지만 제가 드리는 이 파일은 사령관님의 원본 2~22장을 그대로 복사해서 넣으시면 됩니다.
+
 })();
 </script>
-</body>
-</html>
+
+<style>
+    /* =========================================
+       1. 디자인 변수 (V15.1 테마 유지)
+       ========================================= */
+    :root {
+        /* [주간] */
+        --t-input-bg: #f8f9fa;       
+        --t-input-text: #2d3436;     
+        --t-border: #dfe6e9;         
+        
+        --btn-mic-bg: linear-gradient(135deg, #e0e0e0 0%, #b0b0b0 100%); 
+        --btn-mic-text: #2d3436;
+        --btn-check-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --btn-check-text: #ffffff;
+    }
+
+    /* [야간] */
+    [data-theme="dark"] {
+        --t-input-bg: #2d3436;       
+        --t-input-text: #dfe6e9;     
+        --t-border: #636e72;         
+        
+        --btn-mic-bg: linear-gradient(135deg, #636e72 0%, #2d3436 100%); 
+        --btn-mic-text: #dfe6e9;
+        --btn-check-bg: linear-gradient(135deg, #C2935A 0%, #A67C49 100%);
+        --btn-check-text: #ffffff;   
+    }
+
+    /* 2. [V16.0] 시험 모드 버튼 (반응형 최적화) */
+    #testToggleBtn {
+        margin-left: 8px; /* 간격 축소 */
+        background: var(--primary-gradient);
+        border: 1px solid rgba(255,255,255,0.2);
+        padding: 8px 16px;
+        border-radius: 20px;
+        color: #fff;
+        cursor: pointer;
+        font-weight: bold;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        font-size: 15px;
+        z-index: 9999;
+        transition: transform 0.2s;
+        
+        /* 텍스트 줄바꿈 방지 */
+        white-space: nowrap; 
+    }
+    #testToggleBtn:active { transform: scale(0.95); }
+    #testToggleBtn.active {
+        background: #ff4757; 
+        box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);
+    }
+
+    /* [핵심] 모바일 화면(폭 600px 이하)에서는 글자를 숨김 */
+    @media (max-width: 600px) {
+        #testToggleBtn {
+            padding: 8px 10px; /* 좌우 여백 줄임 */
+            font-size: 18px;   /* 아이콘은 좀 더 크게 */
+        }
+        /* span 태그로 감싼 텍스트만 숨김 처리할 예정 */
+        #testToggleBtn span.btn-text {
+            display: none;
+        }
+    }
+    
+    #versionBadge {
+        position: fixed; bottom: 5px; right: 5px;
+        background: rgba(0,0,0,0.6); color: #81ecec;
+        padding: 3px 8px; border-radius: 6px; font-size: 11px;
+        z-index: 10000; pointer-events: none;
+        backdrop-filter: blur(4px);
+    }
+
+    /* 3. 레이아웃 (Column 강제) */
+    .verse-card.test-mode {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 15px !important;
+    }
+    .verse-card.test-mode .v-num {
+        align-self: flex-start;
+        margin-bottom: 0;
+        font-size: 20px;
+    }
+
+    /* 4. 시험지 디자인 */
+    .test-wrapper {
+        width: 100%;
+        padding: 0;
+        background: transparent;
+        display: flex; flex-direction: column; gap: 12px;
+    }
+    
+    .test-input {
+        width: 100%;
+        height: 180px !important; 
+        padding: 18px; 
+        font-size: 18px; 
+        border-radius: 12px; 
+        border: 2px solid var(--t-border);
+        background: var(--t-input-bg);   
+        color: var(--t-input-text);      
+        line-height: 1.7; 
+        resize: none; 
+        outline: none;
+        box-sizing: border-box;
+        transition: border 0.3s, background 0.3s;
+        box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .test-input:focus { border-color: var(--text-num); }
+
+    /* 5. 버튼 그룹 */
+    .test-controls { display: flex; gap: 12px; margin-top: 5px; }
+    .v15-btn {
+        flex: 1; padding: 14px; border-radius: 12px; border: none;
+        cursor: pointer; font-weight: 800; font-size: 16px;
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        transition: transform 0.1s, box-shadow 0.2s;
+    }
+    .v15-btn:active { transform: scale(0.97); box-shadow: none; }
+    
+    .mic-btn { background: var(--btn-mic-bg); color: var(--btn-mic-text); }
+    .mic-btn.listening { background: #ff4757 !important; color: white !important; animation: pulse 1.5s infinite; }
+    .check-btn { background: var(--btn-check-bg); color: var(--btn-check-text); }
+
+    /* 6. 결과창 */
+    .grade-result {
+        background: var(--t-input-bg);
+        color: var(--t-input-text);
+        padding: 20px;
+        border-radius: 12px; line-height: 2.0; font-size: 17px;
+        margin-top: 10px; border: 1px solid var(--t-border);
+        word-break: keep-all;
+        display: none;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .diff-perfect { color: var(--t-input-text); } 
+    .diff-wrong { color: #ff7675; text-decoration: line-through; opacity: 0.7; margin-right: 4px;} 
+    .diff-missing { color: #0984e3; font-weight: 900; border-bottom: 2px solid #0984e3; margin: 0 4px; } 
+    .diff-particle { color: #a29bfe; font-weight: 900; } 
+
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(255, 71, 87, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); } }
+</style>
+
+<script>
+    window.addEventListener('load', function() {
+        const vBadge = document.createElement('div');
+        vBadge.id = 'versionBadge';
+        vBadge.innerText = 'V16.0 Mobile Optimized';
+        document.body.appendChild(vBadge);
+
+        // [V15.5] 장 이동 안전장치
+        if (typeof window.load === 'function' && !window.originalLoad) {
+            window.originalLoad = window.load; 
+            window.load = function(ch, mode) {
+                if (typeof isTestMode !== 'undefined' && isTestMode) {
+                    toggleTestMode(); 
+                }
+                window.originalLoad(ch, mode); 
+            };
+        }
+
+        const header = document.querySelector('.control-island') || document.querySelector('header');
+        if (document.getElementById('testToggleBtn')) return;
+
+        const toggleBtn = document.createElement('button');
+        toggleBtn.id = 'testToggleBtn';
+        toggleBtn.type = 'button';
+        
+        // [V16.0] 모바일 대응을 위해 HTML 구조 변경 (텍스트를 span으로 감쌈)
+        toggleBtn.innerHTML = '📝 <span class="btn-text">시험 모드</span>';
+        
+        toggleBtn.onclick = toggleTestMode;
+        header.appendChild(toggleBtn);
+    });
+
+    let isTestMode = false;
+    let recognition = null;
+    let isListening = false;
+
+    // ===========================
+    // Core 1. 모드 전환
+    // ===========================
+    function toggleTestMode() {
+        isTestMode = !isTestMode;
+        const btn = document.getElementById('testToggleBtn');
+        const cards = document.querySelectorAll('.verse-card');
+
+        if (cards.length === 0) {
+            alert("⚠️ 먼저 장(Chapter)을 선택해주세요.");
+            isTestMode = !isTestMode; return;
+        }
+
+        if (isTestMode) {
+            // [ON] 종료 버튼으로 변경 (텍스트 숨김 로직 유지)
+            btn.innerHTML = '❌ <span class="btn-text">종료</span>';
+            btn.classList.add('active');
+            if(typeof isMarkingMode !== 'undefined' && isMarkingMode) toggleEditMode();
+
+            cards.forEach(card => {
+                card.classList.add('test-mode');
+                const contentEl = card.querySelector('.verse-text') || card.querySelector('.verse-content');
+                if (!contentEl) return;
+
+                const originalText = contentEl.innerText.trim();
+                contentEl.style.display = 'none';
+
+                if(card.querySelector('.test-wrapper')) return;
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'test-wrapper';
+                wrapper.innerHTML = `
+                    <textarea class="test-input" 
+                        placeholder="여기를 터치하여 입력하거나, [음성 입력]을 사용하세요."></textarea>
+                    <div class="test-controls">
+                        <button type="button" class="v15-btn mic-btn" onclick="startStt(this)">
+                            <span>🎙️</span> 음성 입력
+                        </button>
+                        <button type="button" class="v15-btn check-btn" onclick="gradeVerse(this, \`${escapeText(originalText)}\`)">
+                            <span>💯</span> 채점 하기
+                        </button>
+                    </div>
+                    <div class="grade-result"></div>
+                `;
+                card.appendChild(wrapper);
+            });
+            
+        } else {
+            // [OFF] 원래 버튼으로 복귀
+            btn.innerHTML = '📝 <span class="btn-text">시험 모드</span>';
+            btn.classList.remove('active');
+            
+            if(isListening && recognition) {
+                recognition.stop();
+                recognition = null; 
+                isListening = false;
+            }
+
+            document.querySelectorAll('.test-wrapper').forEach(el => el.remove());
+            document.querySelectorAll('.verse-card').forEach(c => c.classList.remove('test-mode'));
+            document.querySelectorAll('.verse-text').forEach(el => el.style.display = 'block');
+            document.querySelectorAll('.verse-content').forEach(el => el.style.display = 'block');
+        }
+    }
+
+    function escapeText(text) { return text.replace(/`/g, "").replace(/"/g, "&quot;").replace(/\n/g, " "); }
+
+    // ===========================
+    // Core 2. 마이크 (V15.5 안정화 로직)
+    // ===========================
+    function startStt(btnElement) {
+        if (/Android|iPhone|iPad/i.test(navigator.userAgent) && location.protocol === 'file:') {
+            alert("⛔ [보안 경고]\n모바일에서 '내 파일'로 열면 마이크가 차단됩니다.\n\nHTTPS 주소(깃허브 등)로 접속해주세요.");
+            return;
+        }
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            alert("이 브라우저는 음성 인식을 지원하지 않습니다."); return;
+        }
+
+        const inputArea = btnElement.parentElement.parentElement.querySelector('.test-input');
+
+        if (isListening) {
+            if(recognition) recognition.stop();
+            return;
+        }
+
+        try {
+            if (recognition) recognition = null; 
+
+            recognition = new SpeechRecognition();
+            recognition.lang = 'ko-KR';
+            recognition.continuous = false; 
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+            
+            recognition.onstart = function() {
+                isListening = true;
+                document.querySelectorAll('.mic-btn').forEach(b => {
+                    b.classList.add('listening');
+                    b.innerHTML = "<span>⏹️</span> 멈춤";
+                });
+            };
+
+            recognition.onend = function() {
+                isListening = false;
+                document.querySelectorAll('.mic-btn').forEach(b => {
+                    b.classList.remove('listening');
+                    b.innerHTML = "<span>🎙️</span> 음성 입력";
+                });
+                recognition = null; 
+            };
+
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                inputArea.value += (inputArea.value ? " " : "") + transcript;
+                inputArea.scrollTop = inputArea.scrollHeight;
+            };
+
+            recognition.onerror = function(event) {
+                isListening = false;
+                document.querySelectorAll('.mic-btn').forEach(b => {
+                    b.classList.remove('listening');
+                    b.innerHTML = "<span>🎙️</span> 음성 입력";
+                });
+                recognition = null;
+                if(event.error === 'not-allowed') {
+                    alert("마이크 권한이 거부되었습니다.");
+                }
+            };
+            
+            recognition.start();
+
+        } catch (e) {
+            alert("마이크 오류: " + e.message);
+            isListening = false;
+            recognition = null;
+        }
+    }
+
+    // ===========================
+    // Core 3. 채점 로직
+    // ===========================
+    function gradeVerse(btnElement, originalRaw) {
+        const wrapper = btnElement.parentElement.parentElement;
+        const userText = wrapper.querySelector('.test-input').value.trim();
+        const resultDiv = wrapper.querySelector('.grade-result');
+
+        if (!userText) {
+            alert("내용을 입력해주세요!");
+            return;
+        }
+
+        const cleanOrg = originalRaw.replace(/[.,?!'"\(\)\[\]]/g, "").replace(/\s+/g, "");
+        const cleanUser = userText.replace(/[.,?!'"\(\)\[\]]/g, "").replace(/\s+/g, "");
+
+        const dmp = new diff_match_patch();
+        const diffs = dmp.diff_main(cleanOrg, cleanUser);
+        dmp.diff_cleanupSemantic(diffs);
+
+        let htmlBuilder = "";
+        let wrongPoints = 0;
+        let totalLen = cleanOrg.length;
+
+        for (let i = 0; i < diffs.length; i++) {
+            const [type, text] = diffs[i]; 
+            if (type === 0) {
+                htmlBuilder += `<span class="diff-perfect">${text}</span>`;
+            } else if (type === -1) {
+                if (i + 1 < diffs.length && diffs[i+1][0] === 1) {
+                    const nextText = diffs[i+1][1]; 
+                    if (text.length >= 2 && nextText.length >= 1 && text[0] === nextText[0]) {
+                        htmlBuilder += `<span class="diff-particle">${nextText}</span>`; 
+                        wrongPoints += (text.length * 0.3);
+                    } else {
+                        htmlBuilder += `<span class="diff-missing">[${text}]</span>`; 
+                        htmlBuilder += `<span class="diff-wrong">${nextText}</span>`; 
+                        wrongPoints += text.length;
+                    }
+                    i++; 
+                } else {
+                    htmlBuilder += `<span class="diff-missing">[${text}]</span>`;
+                    wrongPoints += text.length;
+                }
+            } else if (type === 1) {
+                htmlBuilder += `<span class="diff-wrong">${text}</span>`;
+                wrongPoints += text.length;
+            }
+        }
+
+        let score = Math.max(0, Math.round(((totalLen - wrongPoints) / totalLen) * 100));
+        let badgeColor = score >= 90 ? '#00b894' : (score >= 70 ? '#fdcb6e' : '#ff7675');
+
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = `
+            <div style="background:${badgeColor}; color:#2d3436; display:inline-block; padding:6px 12px; border-radius:20px; font-weight:900; margin-bottom:10px; font-size:15px; box-shadow:0 2px 5px rgba(0,0,0,0.2);">
+                점수: ${score}점
+            </div>
+            <div style="margin-top:5px; word-break:break-all;">${htmlBuilder}</div>
+        `;
+    }
+</script>
