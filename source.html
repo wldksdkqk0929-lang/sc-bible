@@ -1813,56 +1813,51 @@
 </script>
 
 <style>
-    /* 이 디자인은 화면 너비가 1024px 이상(PC/태블릿 가로)일 때만 적용됩니다 */
+    /* 1. [지시사항 반영] 우측 하단 버전 배지 즉시 제거 */
+    #versionBadge {
+        display: none !important;
+    }
+
+    /* 2. PC 화면(1024px 이상) 전용 레이아웃 재구축 */
     @media (min-width: 1024px) {
         
-        /* 1. 상단바(Header) 높이와 여백 확장 */
+        /* 헤더: 아래쪽 불필요한 여백(빨간 체크 영역) 제거 */
         header {
-            padding: 20px 0 !important; /* 위아래 여백을 2배로 늘림 */
+            padding-top: 25px !important;
+            padding-bottom: 5px !important; /* 턱을 깎아서 본문과 밀착 */
+            height: auto !important;        /* 내용물만큼만 높이 잡기 */
         }
 
-        /* 2. 장 번호 버튼 (1, 2, 3...) 크기 확대 */
-        .ch-btn {
-            padding: 12px 24px !important; /* 버튼 뚱뚱하게 */
-            font-size: 18px !important;    /* 글자 크기 키움 */
-            border-radius: 16px !important; /* 둥글기 조정 */
-            margin-right: 6px !important;  /* 버튼 사이 간격 벌림 */
-        }
-        
-        /* 현재 선택된 장 버튼은 더 크게 강조 */
-        .ch-btn.active {
-            transform: scale(1.1) !important; 
-        }
-
-        /* 3. 소제목 버튼 (주제 버튼) 크기 확대 */
-        .sub-btn {
-            padding: 10px 22px !important; /* 내부 여백 확장 */
-            font-size: 16px !important;    /* 글자 크기 키움 */
-            border-radius: 16px !important;
-            margin-right: 8px !important;  /* 버튼 사이 간격 벌림 */
-        }
-
-        /* 4. 우측 상단 컨트롤 섬(Island) 확장 */
+        /* 컨트롤 섬(우측 상단 아이콘들): 위치 고정 */
         .control-island {
-            top: 25px !important;    /* 위치 재조정 */
-            right: 50px !important;  /* 우측 여백 확보 */
-            padding: 10px 25px !important; /* 섬 크기 확장 */
-            gap: 20px !important;    /* 아이콘끼리 거리 벌림 */
-            transform: scale(1.1);   /* 전체적으로 1.1배 뻥튀기 */
+            top: 20px !important;
+            right: 40px !important;
+            z-index: 9999 !important; /* 항상 맨 위에 */
         }
 
-        /* 5. 아이콘 버튼 크기 미세 조정 */
-        .icon-btn {
-            width: 42px !important;
-            height: 42px !important;
-            font-size: 20px !important;
+        /* 챕터 버튼 구역: 한 줄 기차(스크롤) 폐기 -> 2줄 바둑판 배열 */
+        .row-chapters {
+            flex-wrap: wrap !important;      /* 줄바꿈 허용 */
+            padding-right: 240px !important; /* 우측 '컨트롤 섬' 침범 방지 구역 확보 */
+            gap: 10px !important;            /* 버튼 사이 간격 */
+            overflow: visible !important;    /* 스크롤바 제거 */
+            justify-content: flex-start !important; /* 왼쪽 정렬 */
         }
 
-        /* 6. 가로 스크롤 영역 여백 확보 (잘림 방지) */
-        .row-chapters, .row-subs {
-            padding-left: 50px !important; /* 왼쪽 시작점 여유 */
-            padding-bottom: 15px !important; /* 스크롤바 공간 확보 */
-            gap: 12px !important; /* 요소 간격 강제 확장 */
+        /* 챕터 버튼 디자인: 적당한 크기로 조절 */
+        .ch-btn {
+            flex: 0 0 auto !important;      /* 크기 찌그러짐 방지 */
+            width: auto !important;         /* 너비 자동 */
+            padding: 8px 20px !important;   /* 내부 여백 */
+            font-size: 16px !important;     /* 글자 크기 */
+            margin: 0 !important;           /* 마진 초기화 (gap으로 대체) */
+            border-radius: 12px !important;
+        }
+
+        /* 소제목(2번째 줄) 구역: 위쪽 간격 살짝 조정 */
+        .row-subs {
+            margin-top: 5px !important;
+            padding-left: 20px !important;
         }
     }
 </style>
