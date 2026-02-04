@@ -439,51 +439,59 @@
 <script>eval(decodeURIComponent(escape(window.atob("CiAgICAvLyBb6ri06riJIO2MqOy5mF0g64iIKPCfkYHvuI8pL+ybkOyIreydtCjwn5mIKSDslYTsnbTsvZgg64+Z6riw7ZmUIOyImOyglQogICAgd2luZG93LnRvZ2dsZUFsbCA9IGZ1bmN0aW9uKGJ0bikgewogICAgICAgIC8vIDEuIOuyhO2KvOydtCDsho3tlZwg6rWs7JetKFNlY3Rpb24p7J2EIOywvuydjAogICAgICAgIGNvbnN0IGdyb3VwID0gYnRuLmNsb3Nlc3QoJy5zZWN0aW9uLWdyb3VwJyk7CiAgICAgICAgY29uc3QgY2FyZHMgPSBncm91cC5xdWVyeVNlbGVjdG9yQWxsKCcudmVyc2UtY2FyZCcpOwogICAgICAgIAogICAgICAgIC8vIDIuIO2YhOyerCDsnbQg6rWs7Jet7J2YIOy5tOuTnOuTpCDspJEg7ZWY64KY652864+EIOyIqOqyqOyguCDsnojripTsp4AoaGlkZGVuIO2BtOuemOyKpOqwgCDsnojripTsp4ApIO2ZleyduAogICAgICAgIC8vIChoaWRkZW7snbQg7J6I7Jy866m0ICfthLDsuZjtlZjsl6wg7ZmV7J24JyDsg4Htg5wsIOyXhuycvOuptCAn7ISx6rWsIOuCtOyaqSfsnbQg67O07J2064qUIOyDge2DnCkKICAgICAgICAvLyDso7zsnZg6IHRvZ2dsZSDsoITsnZgg7IOB7YOc66W8IOyytO2BrO2VmOuKlCDqsoPsnbTrr4DroZwsIAogICAgICAgIC8vICfslrTrlqQg6rKMIGhpZGRlbuydtOuptCcgLT4g7J207KCcIOuztOyXrOykhCDssKjroYAgLT4g64ukIOuztOyXrOyjvOqzoCDsm5DsiK3snbTroZwg67OA7IugCiAgICAgICAgLy8gJ+2VmOuCmOuPhCBoaWRkZW7snbQg7JeG7Jy866m0JyAtPiDri6Qg67O07Jes7KeA6rOgIOyeiOuKlCDsg4Htg5wgLT4g64ukIOqwgOumrOqzoCDriIjsnLzroZwg67OA7IugCiAgICAgICAgCiAgICAgICAgbGV0IGhhc0hpZGRlbiA9IEFycmF5LmZyb20oY2FyZHMpLnNvbWUoYyA9PiBjLmNsYXNzTGlzdC5jb250YWlucygnaGlkZGVuJykpOwoKICAgICAgICAvLyAzLiDquLDriqUg7Iuk7ZaJICjquIDsnpAg7Iio6riw6riwL+uztOydtOq4sCkKICAgICAgICBjYXJkcy5mb3JFYWNoKGMgPT4gYy5jbGFzc0xpc3QudG9nZ2xlKCdoaWRkZW4nLCAhaGFzSGlkZGVuKSk7CiAgICAgICAgCiAgICAgICAgLy8gNC4gW+2VteyLrCDsiJjsoJVdIOyVhOydtOy9mOydhCDsg4Htg5zsl5Ag66ee7LawIOqwleygnOuhnCDqsIjslYTrgbzsm4AKICAgICAgICBpZiAoaGFzSGlkZGVuKSB7CiAgICAgICAgICAgIC8vIFvsg4HtmaldIOuwqeq4iCDsiKjqsqjsp4Qg6rKD65Ok7J2EIOuLpCDrs7Tsl6zspKzsnYwgKOyEseq1rCDrs7TsnoQg7IOB7YOcKQogICAgICAgICAgICAvLyBb7ZaJ64+ZXSDsnbTsoJwg6rCA66a0IOyImCDsnojslrTslbwg7ZWY66+A66GcICfsm5DsiK3snbQn66GcIOuzgOqyvQogICAgICAgICAgICBidG4uaW5uZXJIVE1MID0gJzxzcGFuPvCfmYg8L3NwYW4+JzsKICAgICAgICB9IGVsc2UgewogICAgICAgICAgICAvLyBb7IOB7ZmpXSDrsKnquIgg64ukIOqwgOugpOuyhOuguOydjCAo7YSw7LmY7ZWY7JesIO2ZleyduCDsg4Htg5wpCiAgICAgICAgICAgIC8vIFvtlonrj5ldIOydtOygnCDrs7wg7IiYIOyeiOyWtOyVvCDtlZjrr4DroZwgJ+uIiCfsnLzroZwg67OA6rK9CiAgICAgICAgICAgIGJ0bi5pbm5lckhUTUwgPSAnPHNwYW4+8J+Rge+4jzwvc3Bhbj4nOwogICAgICAgIH0KICAgIH07Cg=="))));</script>
 
 <style>
-    /* 1. [지시사항 반영] 우측 하단 버전 배지 즉시 제거 */
-    #versionBadge {
-        display: none !important;
-    }
+    /* 1. 버전 배지 제거 (유지) */
+    #versionBadge { display: none !important; }
 
-    /* 2. PC 화면(1024px 이상) 전용 레이아웃 재구축 */
+    /* 2. PC 화면(1024px 이상) 전용 정밀 레이아웃 */
     @media (min-width: 1024px) {
         
-        /* 헤더: 아래쪽 불필요한 여백(빨간 체크 영역) 제거 */
+        /* [헤더] 높이를 내용물에 맞게 유동적으로, 턱은 깎음 */
         header {
-            padding-top: 25px !important;
-            padding-bottom: 5px !important; /* 턱을 깎아서 본문과 밀착 */
-            height: auto !important;        /* 내용물만큼만 높이 잡기 */
+            height: auto !important;
+            padding-top: 15px !important;
+            padding-bottom: 5px !important;
         }
 
-        /* 컨트롤 섬(우측 상단 아이콘들): 위치 고정 */
+        /* [컨트롤 섬] 우측 상단 붙박이 고정 */
         .control-island {
-            top: 20px !important;
-            right: 40px !important;
-            z-index: 9999 !important; /* 항상 맨 위에 */
+            position: absolute !important;
+            top: 15px !important;
+            right: 30px !important;
+            z-index: 100 !important;
+            transform: scale(1.0) !important; /* 너무 크면 방해되므로 원복 */
         }
 
-        /* 챕터 버튼 구역: 한 줄 기차(스크롤) 폐기 -> 2줄 바둑판 배열 */
+        /* [핵심] 장 번호 버튼 구역 (Grid 시스템 도입) */
         .row-chapters {
-            flex-wrap: wrap !important;      /* 줄바꿈 허용 */
-            padding-right: 240px !important; /* 우측 '컨트롤 섬' 침범 방지 구역 확보 */
-            gap: 10px !important;            /* 버튼 사이 간격 */
-            overflow: visible !important;    /* 스크롤바 제거 */
-            justify-content: flex-start !important; /* 왼쪽 정렬 */
+            display: grid !important;
+            /* 수학적 강제: 한 줄에 정확히 11개씩 배치 (1~11, 12~22) */
+            grid-template-columns: repeat(11, 1fr) !important; 
+            gap: 8px !important;             /* 버튼 사이 간격 */
+            
+            /* 섬과의 충돌 방지: 전체 너비의 80%만 사용하고 나머지는 섬에게 양보 */
+            width: 82% !important;           
+            margin-right: auto !important;   /* 왼쪽부터 채움 */
+            padding-right: 0 !important;     /* 불필요한 여백 제거 */
+            
+            overflow: visible !important;    /* 스크롤 제거 */
+            padding-left: 20px !important;   /* 좌측 여백 */
         }
 
-        /* 챕터 버튼 디자인: 적당한 크기로 조절 */
+        /* [장 버튼] 그리드 칸에 맞춰 꽉 차게 */
         .ch-btn {
-            flex: 0 0 auto !important;      /* 크기 찌그러짐 방지 */
-            width: auto !important;         /* 너비 자동 */
-            padding: 8px 20px !important;   /* 내부 여백 */
-            font-size: 16px !important;     /* 글자 크기 */
-            margin: 0 !important;           /* 마진 초기화 (gap으로 대체) */
-            border-radius: 12px !important;
+            width: 100% !important;        /* 칸 채우기 */
+            text-align: center !important; /* 글자 가운데 정렬 */
+            padding: 8px 0 !important;     /* 위아래 여백만 줌 */
+            font-size: 15px !important;    /* 글자 크기 최적화 */
+            border-radius: 8px !important; /* 약간 각지게 */
+            margin: 0 !important;
         }
 
-        /* 소제목(2번째 줄) 구역: 위쪽 간격 살짝 조정 */
+        /* [소제목 줄] 위치 보정 */
         .row-subs {
-            margin-top: 5px !important;
+            margin-top: 8px !important;
             padding-left: 20px !important;
+            border-bottom: none !important; /* PC에선 구분선 제거하여 깔끔하게 */
         }
     }
 </style>
