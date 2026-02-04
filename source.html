@@ -2213,3 +2213,128 @@
         if(e.key === 'Enter') checkLogin();
     });
 </script>
+
+<style>
+    /* [독립 채널] 기존과 겹치지 않는 새로운 이름(security-layer) 사용 */
+    #security-layer {
+        position: fixed; top: 0; left: 0;
+        width: 100%; height: 100%;
+        background-image: var(--bg-gradient);
+        z-index: 99999; /* Z-index 최상위 권한 부여 */
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        backdrop-filter: blur(15px);
+        transition: opacity 0.5s, visibility 0.5s;
+    }
+
+    .security-card {
+        background: rgba(255, 255, 255, 0.85);
+        padding: 40px 30px;
+        border-radius: 24px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+        text-align: center;
+        width: 85%; max-width: 380px;
+        border: 1px solid rgba(255,255,255,0.6);
+        animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        display: flex; flex-direction: column; align-items: center;
+    }
+    [data-theme="dark"] .security-card {
+        background: rgba(30, 34, 40, 0.9);
+        border-color: rgba(255,255,255,0.1);
+    }
+
+    .sec-title {
+        font-size: 26px; font-weight: 900; margin-bottom: 10px;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        word-break: keep-all;
+    }
+    .sec-desc {
+        color: var(--text-sub); font-size: 15px; margin-bottom: 30px; font-weight: 500;
+    }
+
+    .sec-input-wrap {
+        width: 100%; margin-bottom: 25px;
+        display: flex; justify-content: center;
+    }
+
+    .sec-pass-input {
+        width: 100%; max-width: 320px;
+        padding: 15px; font-size: 32px; letter-spacing: 12px;
+        text-align: center;
+        border: 2px solid var(--glass-border);
+        border-radius: 16px;
+        background: var(--input-bg); color: var(--text-num);
+        outline: none; font-weight: bold; transition: 0.3s;
+        box-sizing: border-box;
+    }
+    .sec-pass-input:focus { border-color: #6c5ce7; box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.15); }
+
+    .sec-btn {
+        width: 100%; max-width: 320px;
+        padding: 16px; border: none; border-radius: 16px;
+        background: var(--primary-gradient); color: white;
+        font-size: 18px; font-weight: 800; cursor: pointer;
+        transition: transform 0.2s; box-shadow: 0 8px 20px rgba(108, 92, 231, 0.3);
+    }
+    .sec-btn:active { transform: scale(0.96); }
+
+    @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .shake { animation: shake 0.4s ease-in-out; }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+</style>
+
+<div id="security-layer">
+    <div class="security-card">
+        <div style="font-size:40px; margin-bottom:15px;">🔐</div>
+        <h2 class="sec-title">인맞음 암기 시스템 입장</h2>
+        <p class="sec-desc">보안 코드 4자리를 입력하세요.</p>
+        
+        <div class="sec-input-wrap">
+            <input type="tel" id="final-code-input" class="sec-pass-input" placeholder="CODE" maxlength="4" autocomplete="off">
+        </div>
+        
+        <button class="sec-btn" onclick="tryFinalLogin()">입장하기</button>
+    </div>
+</div>
+
+<script>
+    // [자동 청소 기능] 이전에 남아있던 구형 로그인 창(유령 창)들을 강제로 지웁니다.
+    // 기존 id="loginOverlay"를 가진 녀석들이 있다면 모두 숨김 처리
+    const ghosts = document.querySelectorAll('#loginOverlay');
+    ghosts.forEach(g => g.style.display = 'none');
+
+    // [보안 로직]
+    if (sessionStorage.getItem('isLoggedIn') === 'true') {
+        document.getElementById('security-layer').style.display = 'none';
+    } else {
+        window.addEventListener('load', () => {
+            setTimeout(() => document.getElementById('final-code-input').focus(), 500);
+        });
+    }
+
+    // [독립 실행 함수] 이름 충돌을 피하기 위해 함수 이름도 변경했습니다.
+    function tryFinalLogin() {
+        // 정확히 이 '새로운' 입력창과 '새로운' 레이어만 조작합니다.
+        const input = document.getElementById('final-code-input');
+        const layer = document.getElementById('security-layer');
+        
+        if(input.value === '1440') {
+            sessionStorage.setItem('isLoggedIn', 'true');
+            layer.style.opacity = '0';
+            layer.style.visibility = 'hidden';
+            setTimeout(() => layer.style.display = 'none', 500);
+        } else {
+            const card = document.querySelector('.security-card');
+            card.classList.add('shake');
+            setTimeout(() => card.classList.remove('shake'), 400);
+            input.value = '';
+            input.focus();
+        }
+    }
+    
+    // 엔터키 지원
+    document.getElementById('final-code-input').addEventListener('keypress', function(e) {
+        if(e.key === 'Enter') tryFinalLogin();
+    });
+</script>
