@@ -1811,3 +1811,58 @@
         }
     };
 </script>
+
+<style>
+    /* 이 디자인은 화면 너비가 1024px 이상(PC/태블릿 가로)일 때만 적용됩니다 */
+    @media (min-width: 1024px) {
+        
+        /* 1. 상단바(Header) 높이와 여백 확장 */
+        header {
+            padding: 20px 0 !important; /* 위아래 여백을 2배로 늘림 */
+        }
+
+        /* 2. 장 번호 버튼 (1, 2, 3...) 크기 확대 */
+        .ch-btn {
+            padding: 12px 24px !important; /* 버튼 뚱뚱하게 */
+            font-size: 18px !important;    /* 글자 크기 키움 */
+            border-radius: 16px !important; /* 둥글기 조정 */
+            margin-right: 6px !important;  /* 버튼 사이 간격 벌림 */
+        }
+        
+        /* 현재 선택된 장 버튼은 더 크게 강조 */
+        .ch-btn.active {
+            transform: scale(1.1) !important; 
+        }
+
+        /* 3. 소제목 버튼 (주제 버튼) 크기 확대 */
+        .sub-btn {
+            padding: 10px 22px !important; /* 내부 여백 확장 */
+            font-size: 16px !important;    /* 글자 크기 키움 */
+            border-radius: 16px !important;
+            margin-right: 8px !important;  /* 버튼 사이 간격 벌림 */
+        }
+
+        /* 4. 우측 상단 컨트롤 섬(Island) 확장 */
+        .control-island {
+            top: 25px !important;    /* 위치 재조정 */
+            right: 50px !important;  /* 우측 여백 확보 */
+            padding: 10px 25px !important; /* 섬 크기 확장 */
+            gap: 20px !important;    /* 아이콘끼리 거리 벌림 */
+            transform: scale(1.1);   /* 전체적으로 1.1배 뻥튀기 */
+        }
+
+        /* 5. 아이콘 버튼 크기 미세 조정 */
+        .icon-btn {
+            width: 42px !important;
+            height: 42px !important;
+            font-size: 20px !important;
+        }
+
+        /* 6. 가로 스크롤 영역 여백 확보 (잘림 방지) */
+        .row-chapters, .row-subs {
+            padding-left: 50px !important; /* 왼쪽 시작점 여유 */
+            padding-bottom: 15px !important; /* 스크롤바 공간 확보 */
+            gap: 12px !important; /* 요소 간격 강제 확장 */
+        }
+    }
+</style>
