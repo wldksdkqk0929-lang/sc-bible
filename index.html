@@ -607,4 +607,106 @@
     </div>
 </div>
 
-<script>eval(decodeURIComponent(escape(window.atob("CiAgICAvLyBb67O07JWIIOuhnOyngV0KICAgIC8vIDEuIOydtOuvuCDroZzqt7jsnbjtlojsl4jripTsp4Ag7ZmV7J24ICjruIzrnbzsmrDsoIAg64ur6riwIOyghOq5jOyngCDsnKDsp4ApCiAgICBpZiAoc2Vzc2lvblN0b3JhZ2UuZ2V0SXRlbSgnaXNMb2dnZWRJbicpID09PSAndHJ1ZScpIHsKICAgICAgICBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnbG9naW5PdmVybGF5Jykuc3R5bGUuZGlzcGxheSA9ICdub25lJzsKICAgIH0gZWxzZSB7CiAgICAgICAgLy8g66Gc6re47J24IOyViCDtlojsnLzrqbQg7J6F66Cl7LC9IO2PrOy7pOyKpAogICAgICAgIHdpbmRvdy5hZGRFdmVudExpc3RlbmVyKCdsb2FkJywgKCkgPT4gewogICAgICAgICAgICBzZXRUaW1lb3V0KCgpID0+IGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdhY2Nlc3NDb2RlJykuZm9jdXMoKSwgNTAwKTsKICAgICAgICB9KTsKICAgIH0KCiAgICBmdW5jdGlvbiBjaGVja0xvZ2luKCkgewogICAgICAgIGNvbnN0IGlucHV0ID0gZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2FjY2Vzc0NvZGUnKTsKICAgICAgICBjb25zdCBvdmVybGF5ID0gZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2xvZ2luT3ZlcmxheScpOwogICAgICAgIAogICAgICAgIC8vIFvtlbXsi6xdIOyVlO2YuOy9lOuTnCAnMTQ0MCcg7ZmV7J24CiAgICAgICAgaWYoaW5wdXQudmFsdWUgPT09ICcxNDQwJykgewogICAgICAgICAgICAvLyDthrXqs7wg7LKY66asCiAgICAgICAgICAgIHNlc3Npb25TdG9yYWdlLnNldEl0ZW0oJ2lzTG9nZ2VkSW4nLCAndHJ1ZScpOyAvLyDroZzqt7jsnbgg7IOB7YOcIOq4sOuhnQogICAgICAgICAgICBvdmVybGF5LnN0eWxlLm9wYWNpdHkgPSAnMCc7CiAgICAgICAgICAgIG92ZXJsYXkuc3R5bGUudmlzaWJpbGl0eSA9ICdoaWRkZW4nOwogICAgICAgICAgICBzZXRUaW1lb3V0KCgpID0+IG92ZXJsYXkuc3R5bGUuZGlzcGxheSA9ICdub25lJywgNTAwKTsgLy8g7JmE7KCE7Z6IIOygnOqxsAogICAgICAgIH0gZWxzZSB7CiAgICAgICAgICAgIC8vIOyLpO2MqCDsspjrpqwgKO2dlOuTpOumvCDtmqjqs7wpCiAgICAgICAgICAgIGNvbnN0IGNhcmQgPSBkb2N1bWVudC5xdWVyeVNlbGVjdG9yKCcubG9naW4tY2FyZCcpOwogICAgICAgICAgICBjYXJkLmNsYXNzTGlzdC5hZGQoJ3NoYWtlJyk7CiAgICAgICAgICAgIHNldFRpbWVvdXQoKCkgPT4gY2FyZC5jbGFzc0xpc3QucmVtb3ZlKCdzaGFrZScpLCA0MDApOwogICAgICAgICAgICAKICAgICAgICAgICAgaW5wdXQudmFsdWUgPSAnJzsgLy8g7J6F66Cl6rCSIOy0iOq4sO2ZlAogICAgICAgICAgICBpbnB1dC5mb2N1cygpOwogICAgICAgICAgICAvLyDrqqjrsJTsnbzsl5DshJzripQgYWxlcnTqsIAg6reA7LCu7J2EIOyImCDsnojslrTshJwg7KeE64+Z7J2EIOyjvOqxsOuCmCDsg4nsnYQg67CU6r6464qUIOqyjCDsoovsp4Drp4wKICAgICAgICAgICAgLy8g7ZmV7Iuk7ZWcIO2UvOuTnOuwseydhCDsnITtlbQgYWxlcnQg7Jyg7KeAICjsm5DtlZjsi5zrqbQg7KCc6rGwIOqwgOuKpSkKICAgICAgICAgICAgLy8gYWxlcnQoIuy9lOuTnOqwgCDsmKzrsJTrpbTsp4Ag7JWK7Iq164uI64ukLiIpOyAKICAgICAgICB9CiAgICB9CiAgICAKICAgIC8vIOyXlO2EsO2CpCDsp4Dsm5AKICAgIGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdhY2Nlc3NDb2RlJykuYWRkRXZlbnRMaXN0ZW5lcigna2V5cHJlc3MnLCBmdW5jdGlvbihlKSB7CiAgICAgICAgaWYoZS5rZXkgPT09ICdFbnRlcicpIGNoZWNrTG9naW4oKTsKICAgIH0pOwo="))));</script>
+<style>
+    /* 1. 화면 전체를 덮는 로그인 배경 */
+    #loginOverlay {
+        position: fixed; top: 0; left: 0;
+        width: 100%; height: 100%;
+        background-image: var(--bg-gradient);
+        z-index: 20000;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center; /* 수직, 수평 중앙 정렬 */
+        backdrop-filter: blur(15px);
+        transition: opacity 0.5s, visibility 0.5s;
+    }
+
+    /* 2. 로그인 카드 디자인 (정렬 강화) */
+    .login-card {
+        background: rgba(255, 255, 255, 0.85);
+        padding: 40px 30px;
+        border-radius: 24px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+        text-align: center; /* 내부 텍스트 중앙 정렬 */
+        width: 85%; max-width: 380px;
+        border: 1px solid rgba(255,255,255,0.6);
+        animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        
+        /* [핵심 수정] 내부 요소들을 플렉스로 만들어 강제 중앙 정렬 */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    [data-theme="dark"] .login-card {
+        background: rgba(30, 34, 40, 0.9);
+        border-color: rgba(255,255,255,0.1);
+    }
+
+    /* 3. 타이틀 및 설명 */
+    .login-title {
+        font-size: 26px; font-weight: 900;
+        margin-bottom: 10px;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        word-break: keep-all;
+    }
+    .login-desc {
+        color: var(--text-sub); font-size: 15px;
+        margin-bottom: 30px; font-weight: 500;
+    }
+
+    /* 4. 입력창 감싸는 박스 (정렬 보정) */
+    .code-input-wrapper {
+        width: 100%; /* 카드 너비만큼 꽉 차게 */
+        margin-bottom: 25px;
+        display: flex; justify-content: center; /* 내부 입력창 중앙 정렬 */
+    }
+
+    /* 5. 입력창 스타일 (중앙 정렬 강화) */
+    .pass-input {
+        width: 100%; /* 부모 너비에 맞춤 */
+        max-width: 320px; /* 너무 넓어지지 않게 제한 */
+        padding: 15px;
+        font-size: 32px; letter-spacing: 12px;
+        text-align: center;
+        border: 2px solid var(--glass-border);
+        border-radius: 16px;
+        background: var(--input-bg); color: var(--text-num);
+        outline: none; font-weight: bold;
+        transition: 0.3s;
+        box-sizing: border-box; /* 테두리 포함 크기 계산 */
+    }
+    .pass-input:focus { border-color: #6c5ce7; box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.15); }
+
+    /* 6. 버튼 스타일 */
+    .login-btn {
+        width: 100%; max-width: 320px; /* 입력창과 너비 맞춤 */
+        padding: 16px;
+        border: none; border-radius: 16px;
+        background: var(--primary-gradient); color: white;
+        font-size: 18px; font-weight: 800;
+        cursor: pointer; transition: transform 0.2s;
+        box-shadow: 0 8px 20px rgba(108, 92, 231, 0.3);
+    }
+    .login-btn:active { transform: scale(0.96); }
+
+    /* 애니메이션 */
+    @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .shake { animation: shake 0.4s ease-in-out; }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+</style>
+
+<div id="loginOverlay">
+    <div class="login-card">
+        <div style="font-size:40px; margin-bottom:15px;">🔐</div>
+        <h2 class="login-title">인맞음 암기 시스템 입장</h2>
+        <p class="login-desc">보안 코드 4자리를 입력하세요.</p>
+        
+        <div class="code-input-wrapper">
+            <input type="tel" id="accessCode" class="pass-input" placeholder="CODE" maxlength="4" autocomplete="off">
+        </div>
+        
+        <button class="login-btn" onclick="checkLogin()">입장하기</button>
+    </div>
+</div>
+
+<script>eval(decodeURIComponent(escape(window.atob("CiAgICAvLyBb67O07JWIIOuhnOyngSDsnKDsp4BdCiAgICBpZiAoc2Vzc2lvblN0b3JhZ2UuZ2V0SXRlbSgnaXNMb2dnZWRJbicpID09PSAndHJ1ZScpIHsKICAgICAgICBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnbG9naW5PdmVybGF5Jykuc3R5bGUuZGlzcGxheSA9ICdub25lJzsKICAgIH0gZWxzZSB7CiAgICAgICAgd2luZG93LmFkZEV2ZW50TGlzdGVuZXIoJ2xvYWQnLCAoKSA9PiB7CiAgICAgICAgICAgIHNldFRpbWVvdXQoKCkgPT4gZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2FjY2Vzc0NvZGUnKS5mb2N1cygpLCA1MDApOwogICAgICAgIH0pOwogICAgfQoKICAgIGZ1bmN0aW9uIGNoZWNrTG9naW4oKSB7CiAgICAgICAgY29uc3QgaW5wdXQgPSBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnYWNjZXNzQ29kZScpOwogICAgICAgIGNvbnN0IG92ZXJsYXkgPSBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnbG9naW5PdmVybGF5Jyk7CiAgICAgICAgCiAgICAgICAgaWYoaW5wdXQudmFsdWUgPT09ICcxNDQwJykgewogICAgICAgICAgICBzZXNzaW9uU3RvcmFnZS5zZXRJdGVtKCdpc0xvZ2dlZEluJywgJ3RydWUnKTsKICAgICAgICAgICAgb3ZlcmxheS5zdHlsZS5vcGFjaXR5ID0gJzAnOwogICAgICAgICAgICBvdmVybGF5LnN0eWxlLnZpc2liaWxpdHkgPSAnaGlkZGVuJzsKICAgICAgICAgICAgc2V0VGltZW91dCgoKSA9PiBvdmVybGF5LnN0eWxlLmRpc3BsYXkgPSAnbm9uZScsIDUwMCk7CiAgICAgICAgfSBlbHNlIHsKICAgICAgICAgICAgY29uc3QgY2FyZCA9IGRvY3VtZW50LnF1ZXJ5U2VsZWN0b3IoJy5sb2dpbi1jYXJkJyk7CiAgICAgICAgICAgIGNhcmQuY2xhc3NMaXN0LmFkZCgnc2hha2UnKTsKICAgICAgICAgICAgc2V0VGltZW91dCgoKSA9PiBjYXJkLmNsYXNzTGlzdC5yZW1vdmUoJ3NoYWtlJyksIDQwMCk7CiAgICAgICAgICAgIGlucHV0LnZhbHVlID0gJyc7CiAgICAgICAgICAgIGlucHV0LmZvY3VzKCk7CiAgICAgICAgfQogICAgfQogICAgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2FjY2Vzc0NvZGUnKS5hZGRFdmVudExpc3RlbmVyKCdrZXlwcmVzcycsIGZ1bmN0aW9uKGUpIHsKICAgICAgICBpZihlLmtleSA9PT0gJ0VudGVyJykgY2hlY2tMb2dpbigpOwogICAgfSk7Cg=="))));</script>
