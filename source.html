@@ -1780,3 +1780,36 @@
         }, { passive: false }); // passive: false 필수
     });
 </script>
+
+<script>
+    // 기존의 오작동하던 toggleAll 함수를 이 새로운 함수가 덮어씁니다.
+    window.toggleAll = function(btn) {
+        // 1. 버튼이 속한 구역(Section Group)을 찾습니다.
+        const section = btn.closest('.section-group');
+        if (!section) return;
+
+        // 2. 구역 내의 모든 구절 카드들을 한꺼번에 잡습니다.
+        const cards = section.querySelectorAll('.verse-card');
+        if (cards.length === 0) return;
+
+        // 3. 현재 상태를 판단합니다. (첫 번째 카드가 안 보이면 '숨김 상태'로 간주)
+        // (style.display가 'none'이면 숨겨진 상태입니다)
+        const isHidden = (cards[0].style.display === 'none');
+
+        // 4. 상태에 따라 행동을 결정합니다.
+        if (isHidden) {
+            // [상황: 현재 숨겨져 있음] -> 다시 보여줘라! (Expand)
+            cards.forEach(card => card.style.display = ''); // CSS 원래 속성(flex) 복구
+            
+            // 버튼 아이콘을 '숨기기(원숭이)'로 변경 (이제 보이니까 숨길 수 있게)
+            btn.innerHTML = '<span>🙈</span>'; 
+            
+        } else {
+            // [상황: 현재 보여지고 있음] -> 숨겨라! (Hide)
+            cards.forEach(card => card.style.display = 'none'); // 화면에서 제거
+            
+            // 버튼 아이콘을 '보이기(눈)'로 변경 (이제 숨겨졌으니 볼 수 있게)
+            btn.innerHTML = '<span>👁️</span>'; 
+        }
+    };
+</script>
