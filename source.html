@@ -1886,3 +1886,104 @@
         }
     }
 </style>
+
+<script>
+    // 기존의 음성 인식 변수 재활용
+    if (typeof recognition === 'undefined') var recognition = null;
+    if (typeof isListening === 'undefined') var isListening = false;
+
+    // [핵심] 기존 startStt 함수를 '지속형'으로 덮어쓰기
+    window.startStt = function(btnElement) {
+        // [보안 체크] HTTPS 확인
+        if (/Android|iPhone|iPad/i.test(navigator.userAgent) && location.protocol === 'file:') {
+            alert("⛔ [보안 경고]\n모바일 '내 파일'에서는 마이크가 차단됩니다.\nHTTPS 주소로 접속해주세요.");
+            return;
+        }
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            alert("이 브라우저는 음성 인식을 지원하지 않습니다."); 
+            return;
+        }
+
+        // 입력창 찾기 (버튼의 부모 구조를 타고 올라가서 찾음)
+        const wrapper = btnElement.closest('.test-wrapper');
+        const inputArea = wrapper.querySelector('.test-input');
+
+        // 1. [상황: 이미 듣고 있는 중] -> 사용자가 '마침' 버튼을 누름
+        if (isListening) {
+            if(recognition) {
+                recognition.stop(); // 듣기 종료
+                recognition = null;
+            }
+            isListening = false;
+            
+            // 버튼을 다시 '시작' 상태로 복구
+            btnElement.classList.remove('listening');
+            btnElement.innerHTML = "<span>🎙️</span> 음성 입력";
+            return;
+        }
+
+        // 2. [상황: 꺼져 있음] -> 사용자가 '음성 입력' 버튼을 누름
+        try {
+            recognition = new SpeechRecognition();
+            recognition.lang = 'ko-KR';
+            
+            // ★ [핵심 변경점] continuous를 true로 설정하여, 
+            // 침묵이 흘러도 알아서 꺼지지 않고 계속 듣게 만듭니다.
+            recognition.continuous = true; 
+            recognition.interimResults = false; // 완성된 문장만 깔끔하게 입력
+
+            // [시작 이벤트] 버튼을 '마침' 상태로 변경
+            recognition.onstart = function() {
+                isListening = true;
+                btnElement.classList.add('listening');
+                // 요청하신 대로 '마침' 문구 표시
+                btnElement.innerHTML = "<span>🛑</span> 마침";
+            };
+
+            // [종료 이벤트] 저절로 꺼졌을 때의 처리
+            recognition.onend = function() {
+                // 사용자가 끈 게 아닌데 꺼졌다면(네트워크 오류 등), 상태만 복구
+                isListening = false;
+                btnElement.classList.remove('listening');
+                btnElement.innerHTML = "<span>🎙️</span> 음성 입력";
+            };
+
+            // [결과 수신 이벤트] 말을 하면 텍스트창에 추가
+            recognition.onresult = function(event) {
+                let finalTranscript = '';
+                // continuous 모드에서는 결과가 배열로 들어오므로 반복문으로 처리
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript + ' ';
+                    }
+                }
+                
+                // 기존 내용 뒤에 이어 붙이기
+                inputArea.value += finalTranscript;
+                
+                // 스크롤을 맨 아래로 내려서 방금 쓴 글씨 보여주기
+                inputArea.scrollTop = inputArea.scrollHeight;
+            };
+
+            recognition.onerror = function(event) {
+                console.error("Mic Error:", event.error);
+                // 에러 발생 시 종료 처리
+                if(isListening) {
+                    recognition.stop();
+                    isListening = false;
+                    btnElement.classList.remove('listening');
+                    btnElement.innerHTML = "<span>🎙️</span> 음성 입력";
+                }
+                if(event.error === 'not-allowed') alert("마이크 권한을 허용해주세요.");
+            };
+            
+            recognition.start();
+
+        } catch (e) {
+            alert("마이크 실행 오류: " + e.message);
+            isListening = false;
+        }
+    };
+</script>
