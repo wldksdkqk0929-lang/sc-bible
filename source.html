@@ -2126,3 +2126,23 @@
         });
     }
 </script>
+
+<script>
+    (function forceDayModeStart() {
+        // 1. 강제로 주간 모드 설정
+        document.documentElement.setAttribute('data-theme', 'light');
+        
+        // 2. 저장소(기억) 조작: 과거에 'dark'로 설정했더라도 'light'로 덮어씀
+        // 이렇게 해야 새로고침 할 때마다 항상 밝은 화면으로 시작합니다.
+        localStorage.setItem('theme', 'light');
+        
+        // 3. 우측 상단 테마 버튼 아이콘도 '달(🌙)'로 초기화 (타이밍 맞춤)
+        window.addEventListener('load', () => {
+            // 헤더의 3번째 버튼(테마 버튼)을 찾아서 아이콘 변경
+            const btns = document.querySelectorAll('header .icon-btn');
+            if(btns.length >= 3) {
+                btns[2].innerText = '🌙'; 
+            }
+        });
+    })();
+</script>
