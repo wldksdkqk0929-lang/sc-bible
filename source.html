@@ -1819,53 +1819,70 @@
     /* 2. PC 화면(1024px 이상) 전용 정밀 레이아웃 */
     @media (min-width: 1024px) {
         
-        /* [헤더] 높이를 내용물에 맞게 유동적으로, 턱은 깎음 */
+        /* [헤더] 높이 자동 조절 */
         header {
             height: auto !important;
             padding-top: 15px !important;
             padding-bottom: 5px !important;
         }
 
-        /* [컨트롤 섬] 우측 상단 붙박이 고정 */
+        /* [컨트롤 섬] 우측 상단 고정 */
+        /* 섬의 너비가 대략 300px 정도 차지합니다. */
         .control-island {
             position: absolute !important;
             top: 15px !important;
             right: 30px !important;
             z-index: 100 !important;
-            transform: scale(1.0) !important; /* 너무 크면 방해되므로 원복 */
+            transform: scale(1.0) !important;
         }
 
-        /* [핵심] 장 번호 버튼 구역 (Grid 시스템 도입) */
+        /* [핵심] 장 번호 버튼 구역 (Grid) */
         .row-chapters {
             display: grid !important;
-            /* 수학적 강제: 한 줄에 정확히 11개씩 배치 (1~11, 12~22) */
+            /* 11열 2행 강제 */
             grid-template-columns: repeat(11, 1fr) !important; 
-            gap: 8px !important;             /* 버튼 사이 간격 */
+            gap: 8px !important;
             
-            /* 섬과의 충돌 방지: 전체 너비의 80%만 사용하고 나머지는 섬에게 양보 */
-            width: 82% !important;           
-            margin-right: auto !important;   /* 왼쪽부터 채움 */
-            padding-right: 0 !important;     /* 불필요한 여백 제거 */
+            /* [수정 포인트] 퍼센트(%)가 아니라, 섬의 크기(약 330px)만큼 
+               우측에 '절대적인 빈 공간(Margin)'을 강제로 확보합니다.
+               이제 11장과 22장이 섬 밑으로 들어갈 일은 물리적으로 불가능합니다. */
+            width: auto !important;
+            margin-right: 340px !important; 
             
-            overflow: visible !important;    /* 스크롤 제거 */
-            padding-left: 20px !important;   /* 좌측 여백 */
+            padding-right: 0 !important;
+            padding-left: 20px !important;
+            overflow: visible !important;
         }
 
-        /* [장 버튼] 그리드 칸에 맞춰 꽉 차게 */
+        /* [장 버튼] 스타일 */
         .ch-btn {
-            width: 100% !important;        /* 칸 채우기 */
-            text-align: center !important; /* 글자 가운데 정렬 */
-            padding: 8px 0 !important;     /* 위아래 여백만 줌 */
-            font-size: 15px !important;    /* 글자 크기 최적화 */
-            border-radius: 8px !important; /* 약간 각지게 */
+            width: 100% !important;
+            text-align: center !important;
+            padding: 8px 0 !important;
+            font-size: 15px !important;
+            border-radius: 8px !important;
             margin: 0 !important;
+            
+            /* 버튼 안에 글자와 '장'이 한 줄에 나오도록 */
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+        }
+
+        /* [신규 기능] PC에서만 숫자 뒤에 '장' 글자 자동 추가 */
+        /* 자바스크립트 수정 없이 CSS만으로 처리하는 고급 기법입니다. */
+        .ch-btn::after {
+            content: "장";
+            font-size: 0.9em;
+            margin-left: 2px;
+            font-weight: normal;
         }
 
         /* [소제목 줄] 위치 보정 */
         .row-subs {
             margin-top: 8px !important;
             padding-left: 20px !important;
-            border-bottom: none !important; /* PC에선 구분선 제거하여 깔끔하게 */
+            border-bottom: none !important;
         }
     }
 </style>
