@@ -1989,18 +1989,15 @@
 </script>
 
 <style>
-    /* 1. 화면 전체를 덮는 로그인 배경 (앱 위에 뜸) */
+    /* 1. 화면 전체를 덮는 로그인 배경 */
     #loginOverlay {
-        position: fixed;
-        top: 0; left: 0;
+        position: fixed; top: 0; left: 0;
         width: 100%; height: 100%;
-        background-image: var(--bg-gradient); /* 기존 앱 배경 테마 유지 */
-        z-index: 20000; /* 앱의 모든 요소보다 위에 위치 */
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        backdrop-filter: blur(15px); /* 뒷배경을 흐리게 처리하여 신비감 조성 */
+        background-image: var(--bg-gradient);
+        z-index: 20000;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        backdrop-filter: blur(15px);
         transition: opacity 0.5s, visibility 0.5s;
     }
 
@@ -2011,26 +2008,24 @@
         border-radius: 24px;
         box-shadow: 0 20px 50px rgba(0,0,0,0.2);
         text-align: center;
-        width: 85%;
-        max-width: 380px;
+        width: 85%; max-width: 380px;
         border: 1px solid rgba(255,255,255,0.6);
         animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    
-    /* 야간 모드 대응 */
     [data-theme="dark"] .login-card {
         background: rgba(30, 34, 40, 0.9);
         border-color: rgba(255,255,255,0.1);
     }
 
-    /* 3. 로고 및 텍스트 */
+    /* 3. 타이틀 수정 반영 */
     .login-title {
-        font-size: 24px;
+        font-size: 26px; /* 글자가 길어져서 약간 조정 */
         font-weight: 900;
         margin-bottom: 10px;
         background: var(--primary-gradient);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        word-break: keep-all; /* 단어 끊김 방지 */
     }
     .login-desc {
         color: var(--text-sub);
@@ -2039,79 +2034,45 @@
         font-weight: 500;
     }
 
-    /* 4. 4자리 코드 입력창 (스타일링) */
-    .code-input-box {
-        position: relative;
-        margin-bottom: 25px;
-    }
-    
+    /* 4. 입력창 스타일 */
     .pass-input {
-        width: 100%;
-        padding: 15px;
-        font-size: 32px; /* 숫자를 크게 */
-        letter-spacing: 12px; /* 자간을 넓혀서 4자리가 딱 보이게 */
+        width: 100%; padding: 15px;
+        font-size: 32px; letter-spacing: 12px;
         text-align: center;
         border: 2px solid var(--glass-border);
         border-radius: 16px;
-        background: var(--input-bg);
-        color: var(--text-num);
-        outline: none;
-        font-weight: bold;
+        background: var(--input-bg); color: var(--text-num);
+        outline: none; font-weight: bold;
         transition: 0.3s;
-        box-sizing: border-box;
     }
-    .pass-input:focus {
-        border-color: #6c5ce7;
-        box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.15);
-    }
-    .pass-input::placeholder {
-        font-size: 16px;
-        letter-spacing: 1px;
-        color: #b2bec3;
-        font-weight: normal;
-        transform: translateY(-4px); /* 플레이스홀더 위치 보정 */
-    }
+    .pass-input:focus { border-color: #6c5ce7; box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.15); }
 
-    /* 5. 입장하기 버튼 */
+    /* 5. 버튼 스타일 */
     .login-btn {
-        width: 100%;
-        padding: 16px;
-        border: none;
-        border-radius: 16px;
+        width: 100%; padding: 16px;
+        border: none; border-radius: 16px;
         background: var(--primary-gradient);
         color: white;
-        font-size: 18px;
-        font-weight: 800;
+        font-size: 18px; font-weight: 800;
         cursor: pointer;
-        transition: transform 0.2s, box-shadow 0.2s;
+        transition: transform 0.2s;
         box-shadow: 0 8px 20px rgba(108, 92, 231, 0.3);
     }
-    .login-btn:active {
-        transform: scale(0.96);
-    }
+    .login-btn:active { transform: scale(0.96); }
 
-    /* 등장 애니메이션 */
-    @keyframes slideUp {
-        from { transform: translateY(30px); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
-    }
-    
-    /* 틀렸을 때 흔들림 효과 */
+    /* 애니메이션 */
+    @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     .shake { animation: shake 0.4s ease-in-out; }
-    @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        25% { transform: translateX(-10px); }
-        75% { transform: translateX(10px); }
-    }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
 </style>
 
 <div id="loginOverlay">
     <div class="login-card">
-        <div style="font-size:40px; margin-bottom:15px;">🔒</div>
-        <h2 class="login-title">천국고시 입장</h2>
-        <p class="login-desc">부여받은 접속 코드 4자리를 입력하세요.</p>
+        <div style="font-size:40px; margin-bottom:15px;">🔐</div>
+        <h2 class="login-title">인맞음 암기 시스템 입장</h2>
+        <p class="login-desc">보안 코드 4자리를 입력하세요.</p>
         
-        <div class="code-input-box">
+        <div style="position:relative; margin-bottom:25px;">
             <input type="tel" id="accessCode" class="pass-input" placeholder="CODE" maxlength="4" autocomplete="off">
         </div>
         
@@ -2120,33 +2081,43 @@
 </div>
 
 <script>
-    // 페이지 로드 시 입력창에 바로 포커스
-    window.addEventListener('load', () => {
-        setTimeout(() => document.getElementById('accessCode').focus(), 500);
-    });
+    // [보안 로직]
+    // 1. 이미 로그인했었는지 확인 (브라우저 닫기 전까지 유지)
+    if (sessionStorage.getItem('isLoggedIn') === 'true') {
+        document.getElementById('loginOverlay').style.display = 'none';
+    } else {
+        // 로그인 안 했으면 입력창 포커스
+        window.addEventListener('load', () => {
+            setTimeout(() => document.getElementById('accessCode').focus(), 500);
+        });
+    }
 
     function checkLogin() {
         const input = document.getElementById('accessCode');
         const overlay = document.getElementById('loginOverlay');
         
-        // [테스트용] 일단 아무거나 4자리 치면 통과되게 해둠 (나중에 진짜 코드로 변경 예정)
-        if(input.value.length === 4) {
-            // 통과 효과
+        // [핵심] 암호코드 '1440' 확인
+        if(input.value === '1440') {
+            // 통과 처리
+            sessionStorage.setItem('isLoggedIn', 'true'); // 로그인 상태 기록
             overlay.style.opacity = '0';
             overlay.style.visibility = 'hidden';
-            // 실제 앱 사용 가능해짐
+            setTimeout(() => overlay.style.display = 'none', 500); // 완전히 제거
         } else {
-            // 실패 효과 (흔들림)
+            // 실패 처리 (흔들림 효과)
             const card = document.querySelector('.login-card');
             card.classList.add('shake');
             setTimeout(() => card.classList.remove('shake'), 400);
-            input.value = '';
+            
+            input.value = ''; // 입력값 초기화
             input.focus();
-            alert("4자리를 모두 입력해주세요.");
+            // 모바일에서는 alert가 귀찮을 수 있어서 진동을 주거나 색을 바꾸는 게 좋지만
+            // 확실한 피드백을 위해 alert 유지 (원하시면 제거 가능)
+            // alert("코드가 올바르지 않습니다."); 
         }
     }
     
-    // 엔터키 치면 로그인 버튼 눌리게
+    // 엔터키 지원
     document.getElementById('accessCode').addEventListener('keypress', function(e) {
         if(e.key === 'Enter') checkLogin();
     });
