@@ -1,7 +1,7 @@
 {
-  "name": "인맞음 암기 시스템",
-  "short_name": "인맞음",
-  "start_url": "./source.html",
+  "name": "암기팍팍",
+  "short_name": "암기팍팍",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#e9ecef",
   "theme_color": "#667eea",
