@@ -1,2 +1,6 @@
 source.html
 build.py
+source.html
+build.py
+source backup.txt
+*.txt
