@@ -408,17 +408,3 @@
             animation: pulseRedBtn 1.5s infinite; 
             z-index: 1001; 
         }
-
-/* =========================================
-   [추가됨] 오디오 시스템 UI (빨간 동그라미)
-   ========================================= */
-.v-num-wrapper { display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; min-width: 45px; margin-top: 2px; }
-.audio-btn { background: none; border: none; font-size: 18px; cursor: pointer; padding: 0; transition: transform 0.2s; -webkit-tap-highlight-color: transparent; }
-.audio-btn:active { transform: scale(1.3); }
-
-.verse-content { flex-grow: 1; width: 100%; }
-.audio-ctrl-panel { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 11px; background: rgba(0,0,0,0.05); border-radius: 8px; padding: 5px 10px; width: fit-content; }
-[data-theme="dark"] .audio-ctrl-panel { background: rgba(255,255,255,0.05); }
-
-.speed-sel, .repeat-inp { background: var(--glass-card-bg); border: 1px solid var(--glass-border); border-radius: 4px; font-weight: 700; color: var(--text-main); font-size: 11px; outline: none; }
-.repeat-inp { width: 35px; text-align: center; }
