@@ -215,7 +215,7 @@ window.load = function(ch, mode = 'top') {
                     displayTxt = displayTxt.replace(regex, `<span class="user-mark" onclick="deleteMark(this, ${v.n}, '${markTxt}')">$1</span>`);
                 });
             }
-            // [지시서 반영] 구절 렌더링 영역: v-num-wrapper 및 스피커 버튼 주입
+            // 구절 렌더링 영역: v-num-wrapper 및 스피커 버튼 주입
             card.innerHTML = `
                 <div class="v-num-wrapper">
                     <div class="v-num">${v.n}</div>
@@ -700,7 +700,6 @@ window.prevStep = function() { if(currentStep > 0) { currentStep--; renderStep()
 // [V26.0 신규] 11. 오디오 제어 함수군 (Firebase 연동)
 // =========================================
 
-// [수술 완료] HTML의 ID와 일치하도록 수정
 window.toggleAudioPanel = function() {
     const panel = document.getElementById('audio-popup-panel');
     if(panel) {
@@ -713,7 +712,6 @@ window.setAudioSpeed = function(speed, btn) {
     if(currentAudio) {
         currentAudio.playbackRate = audioSpeed;
     }
-    // 버튼 UI 업데이트
     document.querySelectorAll('.spd-btn').forEach(b => b.classList.remove('active'));
     if(btn) btn.classList.add('active');
 };
@@ -721,12 +719,14 @@ window.setAudioSpeed = function(speed, btn) {
 window.playBibleAudio = function(event, btn, ch, vNum) {
     if(event) event.stopPropagation(); // 카드 터치 이벤트 방지
 
-    // [수술 완료] URL 인코딩 추가하여 특수문자 및 공백 에러 방지
-    const safeVNum = encodeURIComponent(vNum);
+    // [핵심 수술 영역] 파이어베이스 실제 파일명 규격 완벽 동기화 (ex: rev_01_01.m4a)
+    const padCh = String(ch).padStart(2, '0');
+    const padVNum = String(vNum).padStart(2, '0');
+    const fileName = `rev_${padCh}_${padVNum}.m4a`;
     
-    // Firebase Storage 경로 생성
+    // Firebase Storage 단일 경로(rev)로 조립
     const baseUrl = "https://firebasestorage.googleapis.com/v0/b/sc-bible-7a046.firebasestorage.app/o/rev%2F";
-    const audioUrl = `${baseUrl}${ch}%2F${safeVNum}.mp3?alt=media`;
+    const audioUrl = `${baseUrl}${fileName}?alt=media`;
 
     // 동일한 버튼 클릭 시 정지
     if (currentAudio && currentPlayingBtn === btn) {
