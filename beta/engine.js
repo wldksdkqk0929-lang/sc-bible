@@ -1,5 +1,5 @@
 // ==========================================
-// 1. 전역 변수 및 스토리지
+// 1. 전역 변수 및 스토리지 (마킹 기능)
 // ==========================================
 const db = {}; 
 let currentChapter = 1;
@@ -11,44 +11,6 @@ let isAutoScrolling = false;
 let isTestMode = false;
 let recognition = null;
 let isListening = false;
-
-// ==========================================
-// 2. 오디오 엔진 (Firebase)
-// ==========================================
-let currentAudio = null;
-let activeAudioBtn = null;
-
-window.playBibleAudio = function(btn, ch, vNum) {
-    const card = btn.closest('.verse-card');
-    const speed = parseFloat(card.querySelector('.speed-sel').value);
-    const repeatTarget = parseInt(card.querySelector('.repeat-inp').value);
-    let playCount = 1;
-
-    const chStr = String(ch);
-    const vStr = String(vNum).padStart(2, '0');
-    
-    let fileName = (chStr === 'special' || chStr === '2월 시험') ? `special_${vStr}.m4a` : `rev_${chStr.padStart(2, '0')}_${vStr}.m4a`;
-    const audioUrl = `https://firebasestorage.googleapis.com/v0/b/sc-bible-7a046.firebasestorage.app/o/rev%2F${fileName}?alt=media`;
-
-    if (currentAudio) {
-        currentAudio.pause();
-        if (activeAudioBtn) activeAudioBtn.innerText = "🔊";
-        if (currentAudio.src.includes(encodeURIComponent(fileName))) { currentAudio = null; return; }
-    }
-
-    currentAudio = new Audio(audioUrl);
-    currentAudio.playbackRate = speed;
-    activeAudioBtn = btn;
-    btn.innerText = "⏹️";
-
-    currentAudio.onended = () => {
-        if (playCount < repeatTarget) { playCount++; currentAudio.play(); }
-        else { btn.innerText = "🔊"; currentAudio = null; }
-    };
-    currentAudio.play().catch(e => {
-        console.error(e); alert("음성 파일을 찾을 수 없습니다: " + fileName); btn.innerText = "🔊"; currentAudio = null;
-    });
-};
 
 const Storage = {
     get: () => JSON.parse(localStorage.getItem('my_marks') || '{}'),
@@ -72,8 +34,57 @@ const Storage = {
 };
 
 // ==========================================
+// 2. 오디오 엔진 (Firebase)
+// ==========================================
+let currentAudio = null;
+let activeAudioBtn = null;
+
+window.playBibleAudio = function(btn, ch, vNum) {
+    const card = btn.closest('.verse-card');
+    const speed = parseFloat(card.querySelector('.speed-sel').value);
+    const repeatTarget = parseInt(card.querySelector('.repeat-inp').value);
+    let playCount = 1;
+
+    const chStr = String(ch);
+    const vStr = String(vNum).padStart(2, '0');
+    
+    let fileName = '';
+    if (chStr === 'special' || chStr === '2월 시험') {
+        fileName = `special_${vStr}.m4a`; 
+    } else {
+        fileName = `rev_${chStr.padStart(2, '0')}_${vStr}.m4a`;
+    }
+    
+    const audioUrl = `https://firebasestorage.googleapis.com/v0/b/sc-bible-7a046.firebasestorage.app/o/rev%2F${fileName}?alt=media`;
+
+    if (currentAudio) {
+        currentAudio.pause();
+        if (activeAudioBtn) activeAudioBtn.innerText = "🔊";
+        if (currentAudio.src.includes(encodeURIComponent(fileName))) { currentAudio = null; return; }
+    }
+
+    currentAudio = new Audio(audioUrl);
+    currentAudio.playbackRate = speed;
+    activeAudioBtn = btn;
+    btn.innerText = "⏹️";
+
+    currentAudio.onended = () => {
+        if (playCount < repeatTarget) { playCount++; currentAudio.play(); }
+        else { btn.innerText = "🔊"; currentAudio = null; }
+    };
+
+    currentAudio.play().catch(e => {
+        console.error(e);
+        alert("음성 파일을 찾을 수 없습니다: " + fileName);
+        btn.innerText = "🔊";
+        currentAudio = null;
+    });
+};
+
+// ==========================================
 // 3. 화면 렌더링 (load 함수)
 // ==========================================
+// 데이터 주입을 위한 인터페이스
 window.addBibleData = function(ch, data) { db[ch] = data; if(currentChapter === ch) load(ch); };
 
 function load(ch, mode = 'top') {
@@ -128,20 +139,16 @@ function load(ch, mode = 'top') {
             
             card.innerHTML = `
                 <div class="v-num-wrapper" onclick="event.stopPropagation();">
-                    <div class="v-num">${v.n}</div>
                     <button class="audio-btn" onclick="playBibleAudio(this, '${ch}', '${v.n}')">🔊</button>
+                    <div class="v-num">${v.n}</div>
                 </div>
-                <div class="verse-content">
+                <div class="verse-content" style="flex-grow:1;">
                     <div class="verse-text">${displayTxt}</div>
                     <div class="audio-ctrl-panel" onclick="event.stopPropagation();">
-                        <select class="speed-sel">
-                            <option value="0.8">0.8x ▾</option>
-                            <option value="1.0" selected>1.0x ▾</option>
-                            <option value="1.2">1.2x ▾</option>
-                        </select>
-                        <span style="font-weight:900; opacity:0.3; margin:0 6px;">|</span>
+                        <select class="speed-sel"><option value="0.8">0.8x</option><option value="1.0" selected>1.0x</option><option value="1.2">1.2x</option></select>
+                        <span style="font-weight:700; opacity:0.6; font-size:10px;">배속</span>
                         <input type="number" class="repeat-inp" value="1" min="1" max="99">
-                        <span style="font-weight:800; opacity:0.8; margin-left:4px;">회 반복</span>
+                        <span style="font-weight:700; opacity:0.6; font-size:10px;">회 반복</span>
                     </div>
                 </div>`;
             card.onclick = function() { if(!isMarkingMode) { this.classList.toggle('hidden'); updateMasterButtonState(); }};
@@ -168,7 +175,7 @@ function load(ch, mode = 'top') {
 }
 
 // ==========================================
-// 4. 유틸리티 함수들
+// 4. 모든 부가 기능들 (검색, 마킹, 시험 등)
 // ==========================================
 function updateActiveButton(idx) { document.querySelectorAll('.sub-btn').forEach((btn, i) => { btn.classList.toggle('active-sub', i === idx); }); }
 function moveSection(dir) {
@@ -219,6 +226,7 @@ function toggleEditMode() {
     if(isMarkingMode) document.querySelectorAll('.verse-card').forEach(c => c.classList.remove('hidden'));
     else { window.getSelection().removeAllRanges(); document.getElementById('saveMarkBtn').style.display = 'none'; document.getElementById('masterBtn').style.display = 'flex'; }
 }
+
 function handleSelection() {
     if(!isMarkingMode) return;
     const selection = window.getSelection();
@@ -308,19 +316,13 @@ window.jumpToResult = function(ch, sIdx, vIdx) {
     },100);
 }
 
-// ==========================================
-// 5. 보안 및 구역장 모드
-// ==========================================
 function unlockGate() {
     const input = document.getElementById('gate-code');
     if(input.value === '1440') { sessionStorage.setItem('isLoggedIn', 'true'); document.getElementById('security-gate').style.display = 'none'; } 
     else { alert("보안 코드가 틀렸습니다."); input.value = ''; }
 }
 
-window.openDistrictLogin = function() { 
-    document.getElementById('districtModal').style.display = 'block'; 
-    document.getElementById('dmPass').value = '';
-};
+window.openDistrictLogin = function() { document.getElementById('districtModal').style.display = 'block'; };
 window.closeDistrictLogin = function() { document.getElementById('districtModal').style.display = 'none'; };
 window.checkDistrictLogin = function() {
     const group = document.getElementById('dmGroup').value;
@@ -330,15 +332,12 @@ window.checkDistrictLogin = function() {
         document.body.classList.add('mode-district');
         const nav = document.getElementById('chNav');
         nav.innerHTML = '<button class="ch-btn" onclick="location.reload()">⬅ 나가기</button><button class="ch-btn active" onclick="load(\'special\')">2월 시험</button>';
-        if (typeof specialData !== 'undefined') { db['special'] = specialData['2월 시험']; }
+        db['special'] = specialData['2월 시험'];
         load('special'); 
         closeDistrictLogin();
-    } else { alert('⛔ 비밀번호가 일치하지 않습니다.'); document.getElementById('dmPass').value = ''; }
+    } else { alert('⛔ 비밀번호가 일치하지 않습니다.'); }
 };
 
-// ==========================================
-// 6. 시험 및 채점 로직
-// ==========================================
 function toggleTestMode() {
     isTestMode = !isTestMode;
     const btn = document.getElementById('testModeBtn');
@@ -374,9 +373,10 @@ function toggleTestMode() {
         document.querySelectorAll('.verse-text').forEach(el => el.style.display = 'block');
     }
 }
-function escapeText(text) { return text.replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, " "); }
+function escapeText(text) { return text.replace(/'/g, "\\\'").replace(/"/g, "&quot;").replace(/\n/g, " "); }
 function openManual() { alert("매뉴얼 기능은 현재 오디오 통합 버전에서 최적화 중입니다."); }
 
+// [음성 인식 기능]
 window.startStt = function(btn) {
     if (!window.SpeechRecognition && !window.webkitSpeechRecognition) { alert("현재 브라우저는 음성 인식을 지원하지 않습니다."); return; }
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -399,49 +399,30 @@ window.startStt = function(btn) {
     recognition.start();
 };
 
+// [채점 기능]
 window.gradeVerse = function(btn, originalText) {
     const wrapper = btn.closest('.test-wrapper');
     const userInput = wrapper.querySelector('.test-input').value.trim();
     const resultBox = wrapper.querySelector('.grade-result');
     if(!userInput) { alert("암기한 내용을 먼저 입력해주세요!"); return; }
-    
-    if (typeof diff_match_patch === 'undefined') {
-        alert("채점 모듈이 아직 로드되지 않았습니다. 잠시 후 다시 시도해주세요.");
-        return;
-    }
-
-    const cleanOrg = originalText.replace(/[.,?!'"\(\)\[\]]/g, "").replace(/\s+/g, "");
-    const cleanUser = userInput.replace(/[.,?!'"\(\)\[\]]/g, "").replace(/\s+/g, "");
-
     const dmp = new diff_match_patch();
-    const diffs = dmp.diff_main(cleanOrg, cleanUser);
+    const diffs = dmp.diff_main(originalText, userInput);
     dmp.diff_cleanupSemantic(diffs);
-    
-    let htmlBuilder = '';
-    let wrongPoints = 0;
-    let totalLen = cleanOrg.length;
-
+    let html = '', wrongCount = 0;
     diffs.forEach(part => {
         const op = part[0], text = part[1];
-        if(op === 0) htmlBuilder += `<span class="diff-perfect">${text}</span>`;
-        else if(op === -1) { htmlBuilder += `<span class="diff-missing">[${text}]</span>`; wrongPoints += text.length; }
-        else if(op === 1) { htmlBuilder += `<span class="diff-wrong">${text}</span>`; wrongPoints += Math.floor(text.length / 2); }
+        if(op === 0) html += `<span class="diff-perfect">${text}</span>`;
+        else if(op === -1) { html += `<span class="diff-missing">${text}</span>`; wrongCount += text.length; }
+        else if(op === 1) { html += `<span class="diff-wrong">${text}</span>`; wrongCount += Math.floor(text.length / 2); }
     });
-    const score = Math.max(0, Math.round(((totalLen - wrongPoints) / totalLen) * 100));
+    const score = Math.max(0, 100 - (wrongCount * 2));
     let gradeMsg = score === 100 ? "🎉 완벽합니다!" : score >= 80 ? "👏 아주 좋습니다!" : "💪 다시 한번 도전해보세요!";
-    
-    let badgeColor = score === 100 ? '#00b894' : score >= 80 ? '#fdcb6e' : '#ff7675';
-    
-    resultBox.innerHTML = `
-        <div style="background:${badgeColor}; color:#2d3436; display:inline-block; padding:6px 12px; border-radius:20px; font-weight:900; margin-bottom:10px; font-size:15px;">
-            점수: ${score}점 <span style="font-size:12px; opacity:0.8; margin-left:8px;">${gradeMsg}</span>
-        </div>
-        <div style="line-height:2.0; word-break:break-all;">${htmlBuilder}</div>`;
+    resultBox.innerHTML = `<div style="font-weight:900; font-size:18px; color:var(--text-num); margin-bottom:10px;">점수: ${score}점 <span style="font-size:14px; color:var(--text-sub);">${gradeMsg}</span></div><div style="line-height:2.0;">${html}</div>`;
     resultBox.style.display = 'block';
 };
 
 // ==========================================
-// 7. 초기 실행
+// 5. 초기 실행
 // ==========================================
 window.onload = function() {
     if (sessionStorage.getItem('isLoggedIn') === 'true') {

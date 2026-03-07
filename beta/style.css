@@ -410,17 +410,15 @@
         }
 
 /* =========================================
-   [추가됨] 오디오 시스템 UI (비침범형 알약 디자인)
+   [추가됨] 오디오 시스템 UI (빨간 동그라미)
    ========================================= */
-.v-num-wrapper { display: flex; flex-direction: column; align-items: center; gap: 10px; flex-shrink: 0; min-width: 45px; margin-top: 2px; }
-.audio-btn { background: none; border: none; font-size: 20px; cursor: pointer; padding: 2px; transition: transform 0.2s, opacity 0.2s; opacity: 0.85; -webkit-tap-highlight-color: transparent; }
-.audio-btn:active { transform: scale(1.3); opacity: 1; }
-[data-theme="dark"] .audio-btn { filter: grayscale(0.2) brightness(1.2); }
+.v-num-wrapper { display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; min-width: 45px; margin-top: 2px; }
+.audio-btn { background: none; border: none; font-size: 18px; cursor: pointer; padding: 0; transition: transform 0.2s; -webkit-tap-highlight-color: transparent; }
+.audio-btn:active { transform: scale(1.3); }
 
-.verse-content { flex-grow: 1; width: 100%; display: flex; flex-direction: column; }
+.verse-content { flex-grow: 1; width: 100%; }
+.audio-ctrl-panel { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 11px; background: rgba(0,0,0,0.05); border-radius: 8px; padding: 5px 10px; width: fit-content; }
+[data-theme="dark"] .audio-ctrl-panel { background: rgba(255,255,255,0.05); }
 
-.audio-ctrl-panel { align-self: flex-end; display: flex; align-items: center; gap: 4px; margin-top: 12px; font-size: 11px; background: var(--glass-card-bg); border: 1px solid var(--glass-border); border-radius: 20px; padding: 6px 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); opacity: 0.35; transition: opacity 0.3s ease; }
-.audio-ctrl-panel:hover, .audio-ctrl-panel:focus-within { opacity: 1; }
-
-.speed-sel, .repeat-inp { background: transparent; border: none; font-weight: 900; color: var(--text-main); font-size: 12px; outline: none; appearance: none; -webkit-appearance: none; text-align: center; cursor: pointer; }
-.repeat-inp { width: 32px; border-bottom: 2px solid var(--primary-gradient); border-radius: 0; padding: 0 2px; }
+.speed-sel, .repeat-inp { background: var(--glass-card-bg); border: 1px solid var(--glass-border); border-radius: 4px; font-weight: 700; color: var(--text-main); font-size: 11px; outline: none; }
+.repeat-inp { width: 35px; text-align: center; }

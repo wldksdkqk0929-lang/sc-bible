@@ -1,17 +1,26 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-T5N2GXF8TF"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-T5N2GXF8TF');
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>인맞음 암기 시스템 (V26.0 Audio Modular)</title>
+    <title>인맞음 암기 시스템 (V26.0 Modular Audio)</title>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/diff_match_patch/20121119/diff_match_patch.js"></script>
     
+    <!-- [모듈화 1] 디자인 파일 연결 -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="mode-memorize">
     <div class="watermark"></div>
     <div id="modeToast"></div>
-
+    
     <header>
         <div class="deck-options">
             <div class="brand-logo">하루 한걸음</div>
@@ -42,7 +51,8 @@
         </div>
     </div>
 
-    <div id="searchModal" style="display:none;">
+    <!-- Modals & Overlays -->
+    <div id="searchModal">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
             <h2 style="margin:0;">검색</h2><button onclick="closeSearch()" style="background:none; border:none; font-size:24px; cursor:pointer;">✕</button>
         </div>
@@ -64,7 +74,7 @@
         </div>
     </div>
 
-    <div id="districtModal" style="display:none;">
+    <div id="districtModal">
         <div class="dm-overlay" onclick="closeDistrictLogin()"></div>
         <div class="dm-card">
             <h2 style="margin:0 0 15px 0; color:#2d3436;">👨‍🎓 구역장 모드 진입</h2>
@@ -78,7 +88,11 @@
         </div>
     </div>
 
+    <!-- [모듈화 2] 구동 엔진 연결 -->
     <script src="engine.js"></script>
+
+    <!-- [모듈화 3] 7,000줄 성경 데이터 연결 -->
     <script src="bible_data.js"></script>
+
 </body>
 </html>
