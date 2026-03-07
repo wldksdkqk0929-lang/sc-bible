@@ -618,7 +618,7 @@ window.activateDistrictMode = function(groupName) {
 
     const btn = document.createElement('button');
     btn.className = 'ch-btn active';
-    btn.innerText = '2월 시험';
+    btn.innerText = '3월 시험';
     btn.onclick = function() { loadSpecialData(); };
     nav.appendChild(btn);
 
