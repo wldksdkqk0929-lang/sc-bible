@@ -219,7 +219,7 @@ window.load = function(ch, mode = 'top') {
             card.innerHTML = `
                 <div class="v-num-wrapper">
                     <div class="v-num">${v.n}</div>
-                    <button class="speaker-btn" onclick="playBibleAudio(event, this, ${ch}, ${v.n})">🔊</button>
+                    <button class="speaker-btn" onclick="playBibleAudio(event, this, ${ch}, '${v.n}')">🔊</button>
                 </div>
                 <div class="verse-text">${displayTxt}</div>`;
             grp.appendChild(card);
@@ -699,11 +699,12 @@ window.prevStep = function() { if(currentStep > 0) { currentStep--; renderStep()
 // =========================================
 // [V26.0 신규] 11. 오디오 제어 함수군 (Firebase 연동)
 // =========================================
+
+// [수술 완료] HTML의 ID와 일치하도록 수정
 window.toggleAudioPanel = function() {
-    const panel = document.getElementById('audioSettingsPanel');
+    const panel = document.getElementById('audio-popup-panel');
     if(panel) {
-        const isHidden = panel.style.display === 'none' || panel.style.display === '';
-        panel.style.display = isHidden ? 'flex' : 'none';
+        panel.classList.toggle('show');
     }
 };
 
@@ -713,16 +714,19 @@ window.setAudioSpeed = function(speed, btn) {
         currentAudio.playbackRate = audioSpeed;
     }
     // 버튼 UI 업데이트
-    document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.spd-btn').forEach(b => b.classList.remove('active'));
     if(btn) btn.classList.add('active');
 };
 
 window.playBibleAudio = function(event, btn, ch, vNum) {
     if(event) event.stopPropagation(); // 카드 터치 이벤트 방지
 
+    // [수술 완료] URL 인코딩 추가하여 특수문자 및 공백 에러 방지
+    const safeVNum = encodeURIComponent(vNum);
+    
     // Firebase Storage 경로 생성
     const baseUrl = "https://firebasestorage.googleapis.com/v0/b/sc-bible-7a046.firebasestorage.app/o/rev%2F";
-    const audioUrl = `${baseUrl}${ch}%2F${vNum}.mp3?alt=media`;
+    const audioUrl = `${baseUrl}${ch}%2F${safeVNum}.mp3?alt=media`;
 
     // 동일한 버튼 클릭 시 정지
     if (currentAudio && currentPlayingBtn === btn) {
