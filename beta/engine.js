@@ -11,6 +11,11 @@ let isTestMode = false;
 var recognition = null;
 var isListening = false;
 
+// [오디오 엔진 추가 변수]
+let currentAudio = null;
+let currentPlayingBtn = null;
+let audioSpeed = 1.0;
+
 // =========================================
 // 2. Storage 제어기 (LocalStorage)
 // =========================================
@@ -210,7 +215,13 @@ window.load = function(ch, mode = 'top') {
                     displayTxt = displayTxt.replace(regex, `<span class="user-mark" onclick="deleteMark(this, ${v.n}, '${markTxt}')">$1</span>`);
                 });
             }
-            card.innerHTML = `<div class="v-num">${v.n}</div><div class="verse-text">${displayTxt}</div>`;
+            // [지시서 반영] 구절 렌더링 영역: v-num-wrapper 및 스피커 버튼 주입
+            card.innerHTML = `
+                <div class="v-num-wrapper">
+                    <div class="v-num">${v.n}</div>
+                    <button class="speaker-btn" onclick="playBibleAudio(event, this, ${ch}, ${v.n})">🔊</button>
+                </div>
+                <div class="verse-text">${displayTxt}</div>`;
             grp.appendChild(card);
         });
         main.appendChild(grp);
@@ -650,7 +661,6 @@ window.closeManual = function() {
 };
 
 window.renderStep = function() {
-    // data.js에 선언된 manualData 참조
     const data = manualData[currentStep];
     document.getElementById('mStepBadge').innerText = `Step ${currentStep + 1} / ${manualData.length}`;
     document.getElementById('mTitle').innerText = data.title;
@@ -687,7 +697,78 @@ window.nextStep = function() { if(currentStep < manualData.length - 1) { current
 window.prevStep = function() { if(currentStep > 0) { currentStep--; renderStep(); } };
 
 // =========================================
-// 11. 초기화 이벤트 (OnLoad)
+// [V26.0 신규] 11. 오디오 제어 함수군 (Firebase 연동)
+// =========================================
+window.toggleAudioPanel = function() {
+    const panel = document.getElementById('audioSettingsPanel');
+    if(panel) {
+        const isHidden = panel.style.display === 'none' || panel.style.display === '';
+        panel.style.display = isHidden ? 'flex' : 'none';
+    }
+};
+
+window.setAudioSpeed = function(speed, btn) {
+    audioSpeed = parseFloat(speed);
+    if(currentAudio) {
+        currentAudio.playbackRate = audioSpeed;
+    }
+    // 버튼 UI 업데이트
+    document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+    if(btn) btn.classList.add('active');
+};
+
+window.playBibleAudio = function(event, btn, ch, vNum) {
+    if(event) event.stopPropagation(); // 카드 터치 이벤트 방지
+
+    // Firebase Storage 경로 생성
+    const baseUrl = "https://firebasestorage.googleapis.com/v0/b/sc-bible-7a046.firebasestorage.app/o/rev%2F";
+    const audioUrl = `${baseUrl}${ch}%2F${vNum}.mp3?alt=media`;
+
+    // 동일한 버튼 클릭 시 정지
+    if (currentAudio && currentPlayingBtn === btn) {
+        currentAudio.pause();
+        currentAudio = null;
+        currentPlayingBtn = null;
+        btn.innerText = "🔊";
+        btn.classList.remove('playing');
+        return;
+    }
+
+    // 다른 오디오 재생 중이면 정지
+    if (currentAudio) {
+        currentAudio.pause();
+        if(currentPlayingBtn) {
+            currentPlayingBtn.innerText = "🔊";
+            currentPlayingBtn.classList.remove('playing');
+        }
+    }
+
+    // 신규 오디오 생성 및 설정
+    currentAudio = new Audio(audioUrl);
+    currentAudio.playbackRate = audioSpeed;
+    currentAudio.preservesPitch = true; // 배속 시 음정 왜곡 방지
+    currentPlayingBtn = btn;
+
+    btn.innerText = "⏹️";
+    btn.classList.add('playing');
+
+    currentAudio.play().catch(e => {
+        console.error("Audio Play Error:", e);
+        alert("오디오 파일을 불러올 수 없습니다.");
+        btn.innerText = "🔊";
+        btn.classList.remove('playing');
+    });
+
+    currentAudio.onended = function() {
+        btn.innerText = "🔊";
+        btn.classList.remove('playing');
+        currentAudio = null;
+        currentPlayingBtn = null;
+    };
+};
+
+// =========================================
+// 12. 초기화 이벤트 (OnLoad)
 // =========================================
 window.addEventListener('load', function() {
     initTheme();
@@ -737,7 +818,7 @@ window.addEventListener('load', function() {
         }, 500);
     }
     
-    // 보안 게이트 엔터키 이벤트 (HTML에서 찾지 못한 경우 방어)
+    // 보안 게이트 엔터키 이벤트
     const gInput = document.getElementById('gate-code');
     if(gInput) {
         gInput.addEventListener('keypress', function(e) {

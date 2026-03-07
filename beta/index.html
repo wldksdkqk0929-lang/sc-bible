@@ -11,7 +11,7 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>인맞음 암기 시스템 (V24.5 Final)</title>
+    <title>인맞음 암기 시스템 (V26.0 + Audio)</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/diff_match_patch/20121119/diff_match_patch.js"></script>
 
@@ -41,13 +41,32 @@
     <main id="content"></main>
 
     <div class="dock-container">
+        
+        <div id="audio-popup-panel">
+            <div style="display:flex; gap:5px; align-items:center;">
+                <button class="spd-btn" onclick="setAudioSpeed(0.8, this)">0.8x</button>
+                <button class="spd-btn active" onclick="setAudioSpeed(1.0, this)">1.0x</button>
+                <button class="spd-btn" onclick="setAudioSpeed(1.2, this)">1.2x</button>
+            </div>
+            <div style="width:1px; height:20px; background:var(--glass-border);"></div>
+            <div style="display:flex; gap:8px; align-items:center;">
+                <span style="font-size:12px; font-weight:bold; color:var(--text-sub);">반복</span>
+                <input type="number" id="loopCount" class="loop-input" value="1" min="1" max="99">
+            </div>
+        </div>
+
         <div class="nav-dock">
             <button class="arrow-btn" onclick="moveSection(-1)">❮</button>
-            <button id="masterBtn" class="dock-center-btn" onclick="toggleChapter()">
-                <span class="pc-text">👁️ 1장 전체보기</span>
-                <span class="mobile-text">👁️ 전체보기</span>
-            </button>
-            <button id="saveMarkBtn" class="dock-center-btn" onclick="saveMark()">🖍️ 선택 저장</button>
+            
+            <div class="dock-center-group">
+                <button id="masterBtn" class="dock-center-btn" onclick="toggleChapter()">
+                    <span class="pc-text">👁️ 1장 전체보기</span>
+                    <span class="mobile-text">👁️ 전체보기</span>
+                </button>
+                <button id="saveMarkBtn" class="dock-center-btn" onclick="saveMark()">🖍️ 선택 저장</button>
+                <button class="dock-audio-btn" id="audioToggleBtn" onclick="toggleAudioPanel()">🎵</button>
+            </div>
+
             <button class="arrow-btn" onclick="moveSection(1)">❯</button>
         </div>
     </div>
@@ -83,7 +102,7 @@
     <div id="manualOverlay">
         <div class="manual-box">
             <div class="m-header">
-                <span class="m-step-badge" id="mStepBadge">Step 1 / 7</span>
+                <span class="m-step-badge" id="mStepBadge">Step 1 / 8</span>
                 <button class="m-close-btn" onclick="closeManual()">✕</button>
             </div>
             <div class="m-visual-zone" id="mVisualZone"></div>
