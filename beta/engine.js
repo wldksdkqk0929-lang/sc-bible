@@ -68,7 +68,6 @@ window.toggleEditMode = function() {
     const body = document.body;
     const btn = document.getElementById('editModeBtn');
     const toast = document.getElementById('modeToast');
-    
     if(isMarkingMode) {
         body.classList.remove('mode-memorize');
         body.classList.add('mode-marking');
@@ -98,7 +97,6 @@ function handleSelection() {
     const text = selection.toString().trim();
     const saveBtn = document.getElementById('saveMarkBtn');
     const masterBtn = document.getElementById('masterBtn');
-    
     if(text.length > 0 && selection.anchorNode && selection.anchorNode.parentElement.closest('.verse-card')) {
         selectedText = text;
         saveBtn.style.display = 'flex';    
@@ -115,21 +113,18 @@ window.saveMark = function() {
     const selection = window.getSelection();
     const verseNode = selection.anchorNode.parentElement.closest('.verse-card');
     if(!verseNode) return;
-    
     const absoluteVIdx = verseNode.getAttribute('data-v-idx');
     if(absoluteVIdx !== null) {
         const currentScrollY = window.scrollY;
         Storage.add(currentChapter, absoluteVIdx, selectedText);
         load(currentChapter); 
         window.scrollTo(0, currentScrollY);
-        
         const saveBtn = document.getElementById('saveMarkBtn');
         const toast = document.getElementById('modeToast');
         saveBtn.innerHTML = "✅ 저장됨!";
         saveBtn.style.background = "#00b894"; 
         toast.innerHTML = "✅ <b>저장 완료!</b>";
         toast.style.backgroundColor = "#00b894";
-        
         setTimeout(() => {
             if(isMarkingMode) {
                 saveBtn.style.display = 'none';
@@ -156,13 +151,14 @@ window.deleteMark = function(el, vIdx, text) {
     }
 };
 
+document.addEventListener('selectionchange', handleSelection);
+
 // =========================================
 // 5. 렌더링 엔진 (Core Load)
 // =========================================
-function load(ch, mode = 'top') {
+window.load = function(ch, mode = 'top') {
     if (typeof isTestMode !== 'undefined' && isTestMode) toggleTestMode();
     if(!db[ch]) return;
-    
     currentChapter = ch; 
     document.querySelectorAll('.ch-btn').forEach((b,i) => {
         if (typeof ch === 'number') {
@@ -171,13 +167,10 @@ function load(ch, mode = 'top') {
             b.classList.toggle('active', b.innerText === '2월 시험');
         }
     });
-
     const main = document.getElementById('content');
     const subNav = document.getElementById('subNav');
     main.innerHTML = ''; subNav.innerHTML = '';
-    
     const savedMarks = Storage.get();
-    
     db[ch].sections.forEach((s, idx) => {
         const sb = document.createElement('button');
         sb.className = 'sub-btn'; sb.innerText = s.t;
@@ -200,7 +193,6 @@ function load(ch, mode = 'top') {
                 </div>
                 <span class="sec-title-text">${s.t}</span>
             </div>`;
-            
         s.v.forEach((v, vIdx) => {
             const card = document.createElement('div');
             card.className = isMarkingMode ? 'verse-card' : 'verse-card hidden';
@@ -210,7 +202,6 @@ function load(ch, mode = 'top') {
                 updateMasterButtonState();
             };
             card.setAttribute('data-v-idx', v.n); 
-            
             let displayTxt = v.t;
             const marks = savedMarks[`${ch}-${v.n}`]; 
             if(marks && marks.length > 0) {
@@ -237,7 +228,6 @@ function load(ch, mode = 'top') {
             }
         });
     }, {rootMargin:'-40% 0px -40% 0px'});
-    
     document.querySelectorAll('.section-group').forEach(group => observer.observe(group));
     
     if(mode === 'bottom') {
@@ -253,11 +243,10 @@ function load(ch, mode = 'top') {
 // =========================================
 // 6. 네비게이션 및 전체 제어
 // =========================================
-function moveSection(dir) {
+window.moveSection = function(dir) {
     const sections = document.querySelectorAll('.section-group');
     let nextIdx = currentSecIndex + dir;
     isAutoScrolling = true;
-    
     if (nextIdx < 0) {
         if (typeof currentChapter === 'number' && currentChapter > 1) load(currentChapter - 1, 'bottom');
     } else if (nextIdx >= sections.length) {
@@ -283,7 +272,6 @@ window.toggleAll = function(btn) {
     const group = btn.closest('.section-group');
     const cards = group.querySelectorAll('.verse-card');
     let hasHidden = Array.from(cards).some(c => c.classList.contains('hidden'));
-    
     cards.forEach(c => c.classList.toggle('hidden', !hasHidden));
     if (hasHidden) {
         btn.innerHTML = '<span>🙈</span>';
@@ -297,7 +285,6 @@ window.toggleChapter = function() {
     if(isMarkingMode) return;
     const allCards = document.querySelectorAll('.verse-card');
     let hasHidden = Array.from(allCards).some(c => c.classList.contains('hidden'));
-    
     allCards.forEach(c => c.classList.toggle('hidden', !hasHidden));
     const allEyeBtns = document.querySelectorAll('.pill-badge.eye-btn');
     allEyeBtns.forEach(btn => {
@@ -309,13 +296,11 @@ window.toggleChapter = function() {
 function updateMasterButtonState() {
     const allCards = document.querySelectorAll('.verse-card');
     if(allCards.length === 0) return;
-    
     const hasHidden = Array.from(allCards).some(c => c.classList.contains('hidden'));
     const mBtn = document.getElementById('masterBtn');
     const pc = mBtn.querySelector('.pc-text');
     const mo = mBtn.querySelector('.mobile-text');
     const chName = typeof currentChapter === 'string' ? currentChapter : currentChapter + "장";
-    
     if(hasHidden) {
         pc.innerText = `👁️ ${chName} 전체보기`;
         mo.innerText = `👁️ 전체보기`;
@@ -328,17 +313,16 @@ function updateMasterButtonState() {
 // =========================================
 // 7. 검색 엔진
 // =========================================
-function openSearch() { document.getElementById('searchModal').style.display = 'flex'; setTimeout(()=>document.getElementById('searchInput').focus(),100); }
-function closeSearch() { document.getElementById('searchModal').style.display = 'none'; }
+window.openSearch = function() { document.getElementById('searchModal').style.display = 'flex'; setTimeout(()=>document.getElementById('searchInput').focus(),100); }
+window.closeSearch = function() { document.getElementById('searchModal').style.display = 'none'; }
 
-function doSearch() {
+window.doSearch = function() {
     const rawQuery = document.getElementById('searchInput').value.trim();
     if(!rawQuery) return;
     const query = rawQuery.replace(/\s+/g,''); 
     const resBox = document.getElementById('searchResults');
     resBox.innerHTML = '';
     let count = 0, html = '';
-    
     for(let ch=1; ch<=22; ch++){
         if(!db[ch]) continue;
         db[ch].sections.forEach((sec,sIdx)=>{
@@ -366,13 +350,11 @@ window.jumpToResult = function(ch, sIdx, vIdx) {
     document.body.classList.remove('mode-marking');
     document.body.classList.add('mode-memorize');
     document.getElementById('editModeBtn').classList.remove('active');
-    
     load(ch);
     setTimeout(()=>{
         const allCards = document.querySelectorAll('.verse-card');
         allCards.forEach(c=>c.classList.remove('hidden'));
         updateMasterButtonState();
-        
         const targetSec = document.getElementById('s'+sIdx);
         if(targetSec){
             const targetCard = targetSec.querySelectorAll('.verse-card')[vIdx];
@@ -388,30 +370,25 @@ window.jumpToResult = function(ch, sIdx, vIdx) {
 // =========================================
 // 8. 시험 모드 (STT & Diff)
 // =========================================
-function toggleTestMode() {
+window.toggleTestMode = function() {
     isTestMode = !isTestMode;
     const btn = document.getElementById('testModeBtn');
     const cards = document.querySelectorAll('.verse-card');
-    
     if (cards.length === 0) {
         alert("⚠️ 먼저 장(Chapter)을 선택해주세요.");
         isTestMode = !isTestMode; return;
     }
-    
     if (isTestMode) {
         btn.innerHTML = '❌';
         btn.classList.add('active');
         if(typeof isMarkingMode !== 'undefined' && isMarkingMode) toggleEditMode();
-        
         cards.forEach(card => {
             card.classList.add('test-mode');
             const contentEl = card.querySelector('.verse-text');
             if (!contentEl) return;
-            
             const originalText = contentEl.innerText.trim();
             contentEl.style.display = 'none';
             if(card.querySelector('.test-wrapper')) return;
-            
             const wrapper = document.createElement('div');
             wrapper.className = 'test-wrapper';
             wrapper.innerHTML = `
@@ -449,16 +426,13 @@ window.startStt = function(btnElement) {
         alert("⛔ [보안 경고]\n모바일 '내 파일'에서는 마이크가 차단됩니다.\nHTTPS 주소로 접속해주세요.");
         return;
     }
-    
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
         alert("이 브라우저는 음성 인식을 지원하지 않습니다."); 
         return;
     }
-    
     const wrapper = btnElement.closest('.test-wrapper');
     const inputArea = wrapper.querySelector('.test-input');
-    
     if (isListening) {
         if(recognition) {
             recognition.stop();
@@ -469,13 +443,11 @@ window.startStt = function(btnElement) {
         btnElement.innerHTML = "<span>🎙️</span> 음성 입력";
         return;
     }
-    
     try {
         recognition = new SpeechRecognition();
         recognition.lang = 'ko-KR';
         recognition.continuous = true; 
         recognition.interimResults = false; 
-        
         recognition.onstart = function() {
             isListening = true;
             btnElement.classList.add('listening');
@@ -517,23 +489,18 @@ window.gradeVerse = function(btnElement, originalRaw) {
     const wrapper = btnElement.parentElement.parentElement;
     const userText = wrapper.querySelector('.test-input').value.trim();
     const resultDiv = wrapper.querySelector('.grade-result');
-    
     if (!userText) {
         alert("내용을 입력해주세요!");
         return;
     }
-    
     const cleanOrg = originalRaw.replace(/[.,?!'"\(\)\[\]]/g, "").replace(/\s+/g, "");
     const cleanUser = userText.replace(/[.,?!'"\(\)\[\]]/g, "").replace(/\s+/g, "");
-    
     const dmp = new diff_match_patch();
     const diffs = dmp.diff_main(cleanOrg, cleanUser);
     dmp.diff_cleanupSemantic(diffs);
-    
     let htmlBuilder = "";
     let wrongPoints = 0;
     let totalLen = cleanOrg.length;
-    
     for (let i = 0; i < diffs.length; i++) {
         const [type, text] = diffs[i];
         if (type === 0) {
@@ -559,10 +526,8 @@ window.gradeVerse = function(btnElement, originalRaw) {
             wrongPoints += text.length;
         }
     }
-    
     let score = Math.max(0, Math.round(((totalLen - wrongPoints) / totalLen) * 100));
     let badgeColor = score >= 90 ? '#00b894' : (score >= 70 ? '#fdcb6e' : '#ff7675');
-    
     resultDiv.style.display = 'block';
     resultDiv.innerHTML = `
         <div style="background:${badgeColor}; color:#2d3436; display:inline-block; padding:6px 12px; border-radius:20px; font-weight:900; margin-bottom:10px; font-size:15px; box-shadow:0 2px 5px rgba(0,0,0,0.2);">
@@ -570,12 +535,12 @@ window.gradeVerse = function(btnElement, originalRaw) {
         </div>
         <div style="margin-top:5px; word-break:break-all;">${htmlBuilder}</div>
     `;
-};
+}
 
 // =========================================
-// 9. 보안 게이트 (Auth)
+// 9. 보안 게이트 및 구역장 모달 제어
 // =========================================
-(function(){
+;(function(){
     if (sessionStorage.getItem('isLoggedIn') === 'true') {
         document.getElementById('security-gate').style.display = 'none';
     }
@@ -585,7 +550,6 @@ window.unlockGate = function() {
     const input = document.getElementById('gate-code');
     const gate = document.getElementById('security-gate');
     const card = document.querySelector('.gate-card');
-    
     if(input.value === '1440') {
         sessionStorage.setItem('isLoggedIn', 'true');
         gate.style.opacity = '0';
@@ -599,12 +563,66 @@ window.unlockGate = function() {
     }
 };
 
-const gInput = document.getElementById('gate-code');
-if(gInput) {
-    gInput.addEventListener('keypress', function(e) {
-        if(e.key === 'Enter') unlockGate();
-    });
-}
+window.openDistrictLogin = function() {
+    document.getElementById('districtModal').style.display = 'block';
+    document.getElementById('dmPass').value = '';
+    document.getElementById('dmPass').focus();
+};
+
+window.closeDistrictLogin = function() {
+    document.getElementById('districtModal').style.display = 'none';
+};
+
+window.checkDistrictLogin = function() {
+    const group = document.getElementById('dmGroup').value;
+    const pass = document.getElementById('dmPass').value;
+    const codes = { 
+        '장년회': '1001', '부녀회': '2002', '청년회': '3003', '자문회': '4004',
+        '학생회': '5005', '지역': '6006', '24부서': '7007'
+    };
+    if (codes[group] === pass) {
+        activateDistrictMode(group);
+        closeDistrictLogin();
+    } else {
+        alert('⛔ 비밀번호가 일치하지 않습니다.');
+        document.getElementById('dmPass').value = '';
+    }
+};
+
+window.activateDistrictMode = function(groupName) {
+    document.body.classList.add('mode-district');
+    const wmText = `순천 ${groupName} 천국고시 준비자료`;
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' transform='rotate(-45 150 150)' fill='%232c3e50' font-size='18' font-weight='bold' font-family='sans-serif'>${wmText}</text></svg>`;
+    const encoded = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+    document.querySelector('.watermark').style.backgroundImage = `url("${encoded}")`;
+    
+    const nav = document.getElementById('chNav');
+    nav.innerHTML = ''; 
+    
+    const exitBtn = document.createElement('button');
+    exitBtn.className = 'ch-btn';
+    exitBtn.innerText = '⬅ 나가기';
+    exitBtn.onclick = function() { location.reload(); }; 
+    nav.appendChild(exitBtn);
+
+    const btn = document.createElement('button');
+    btn.className = 'ch-btn active';
+    btn.innerText = '2월 시험';
+    btn.onclick = function() { loadSpecialData(); };
+    nav.appendChild(btn);
+
+    db['special'] = specialData['2월 시험'];
+    load('special');
+    
+    const toast = document.getElementById('modeToast');
+    toast.innerHTML = `👨‍🎓 <b>구역장 모드 (${groupName})</b><br>환영합니다.`;
+    toast.style.opacity = 1;
+    setTimeout(()=>toast.style.opacity=0, 2000);
+};
+
+window.loadSpecialData = function() {
+    load('special');
+};
 
 // =========================================
 // 10. 사용법 매뉴얼 제어
@@ -632,7 +650,8 @@ window.closeManual = function() {
 };
 
 window.renderStep = function() {
-    const data = manualData[currentStep]; // data.js 참조
+    // data.js에 선언된 manualData 참조
+    const data = manualData[currentStep];
     document.getElementById('mStepBadge').innerText = `Step ${currentStep + 1} / ${manualData.length}`;
     document.getElementById('mTitle').innerText = data.title;
     document.getElementById('mDesc').innerText = data.desc;
@@ -668,9 +687,22 @@ window.nextStep = function() { if(currentStep < manualData.length - 1) { current
 window.prevStep = function() { if(currentStep > 0) { currentStep--; renderStep(); } };
 
 // =========================================
-// 11. 구역장 모드 제어 (District Leader Mode)
+// 11. 초기화 이벤트 (OnLoad)
 // =========================================
-(function(){
+window.addEventListener('load', function() {
+    initTheme();
+    
+    // 1~22장 버튼 생성
+    const nav = document.getElementById('chNav');
+    for(let i=1; i<=22; i++) {
+        const b = document.createElement('button');
+        b.className = `ch-btn ${i===1?'active':''}`;
+        b.innerText = i + "장"; 
+        b.onclick = () => load(i);
+        nav.appendChild(b);
+    }
+
+    // 구역장 버튼 생성
     const optGroup = document.querySelector('.opt-group');
     if (!document.getElementById('btnDistrictMode') && optGroup) {
         const newBtn = document.createElement('button');
@@ -681,87 +713,7 @@ window.prevStep = function() { if(currentStep > 0) { currentStep--; renderStep()
         newBtn.onclick = () => window.openDistrictLogin(); 
         optGroup.insertBefore(newBtn, optGroup.firstElementChild); 
     }
-})();
 
-window.openDistrictLogin = function() {
-    document.getElementById('districtModal').style.display = 'block';
-    document.getElementById('dmPass').value = '';
-    document.getElementById('dmPass').focus();
-};
-
-window.closeDistrictLogin = function() {
-    document.getElementById('districtModal').style.display = 'none';
-};
-
-window.checkDistrictLogin = function() {
-    const group = document.getElementById('dmGroup').value;
-    const pass = document.getElementById('dmPass').value;
-
-    const codes = { 
-        '장년회': '1001', '부녀회': '2002', '청년회': '3003', '자문회': '4004',
-        '학생회': '5005', '지역': '6006', '24부서': '7007'
-    };
-    
-    if (codes[group] === pass) {
-        activateDistrictMode(group);
-        closeDistrictLogin();
-    } else {
-        alert('⛔ 비밀번호가 일치하지 않습니다.');
-        document.getElementById('dmPass').value = '';
-    }
-};
-
-window.activateDistrictMode = function(groupName) {
-    document.body.classList.add('mode-district');
-    const wmText = `순천 ${groupName} 천국고시 준비자료`;
-    const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' transform='rotate(-45 150 150)' fill='%232c3e50' font-size='18' font-weight='bold' font-family='sans-serif'>${wmText}</text></svg>`;
-    const encoded = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
-    document.querySelector('.watermark').style.backgroundImage = `url("${encoded}")`;
-    
-    const nav = document.getElementById('chNav');
-    nav.innerHTML = ''; 
-    
-    const exitBtn = document.createElement('button');
-    exitBtn.className = 'ch-btn';
-    exitBtn.innerText = '⬅ 나가기';
-    exitBtn.onclick = function() { location.reload(); }; 
-    nav.appendChild(exitBtn);
-
-    const btn = document.createElement('button');
-    btn.className = 'ch-btn active';
-    btn.innerText = '2월 시험';
-    btn.onclick = function() { loadSpecialData(); };
-    nav.appendChild(btn);
-
-    db['special'] = specialData['2월 시험']; // data.js 참조
-    load('special');
-    
-    const toast = document.getElementById('modeToast');
-    toast.innerHTML = `👨‍🎓 <b>구역장 모드 (${groupName})</b><br>환영합니다.`;
-    toast.style.opacity = 1;
-    setTimeout(()=>toast.style.opacity=0, 2000);
-};
-
-window.loadSpecialData = function() {
-    load('special');
-};
-
-// =========================================
-// 12. 초기화 및 이벤트 리스너 (OnLoad)
-// =========================================
-window.addEventListener('load', function() {
-    initTheme();
-    document.addEventListener('selectionchange', handleSelection);
-    
-    const nav = document.getElementById('chNav');
-    for(let i=1; i<=22; i++) {
-        const b = document.createElement('button');
-        b.className = `ch-btn ${i===1?'active':''}`;
-        b.innerText = i + "장"; 
-        b.onclick = () => load(i);
-        nav.appendChild(b);
-    }
-    
     setTimeout(() => load(1), 100);
     
     document.body.addEventListener('touchstart', function(e) {
@@ -777,10 +729,30 @@ window.addEventListener('load', function() {
         localStorage.setItem('theme', 'light');
     })();
     
+    // 보안 게이트 포커싱
     if (sessionStorage.getItem('isLoggedIn') !== 'true') {
         setTimeout(() => {
             const el = document.getElementById('gate-code');
             if(el) el.focus();
         }, 500);
+    }
+    
+    // 보안 게이트 엔터키 이벤트 (HTML에서 찾지 못한 경우 방어)
+    const gInput = document.getElementById('gate-code');
+    if(gInput) {
+        gInput.addEventListener('keypress', function(e) {
+            if(e.key === 'Enter') unlockGate();
+        });
+    }
+
+    // 매뉴얼 초기 닷 세팅
+    const dotsBox = document.getElementById('mDots');
+    if (dotsBox && typeof manualData !== 'undefined') {
+        manualData.forEach((_, i) => {
+            const dot = document.createElement('div');
+            dot.className = 'm-dot';
+            if(i===0) dot.classList.add('active');
+            dotsBox.appendChild(dot);
+        });
     }
 });
