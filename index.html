@@ -15,9 +15,9 @@
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/diff_match_patch/20121119/diff_match_patch.js"></script>
 
-    <link rel="stylesheet" href="styles.css">
-    <script src="data.js"></script>
-    <script defer src="engine.js"></script>
+    <link rel="stylesheet" href="styles.css?v=260308">
+    <script src="data.js?v=260308"></script>
+    <script defer src="engine.js?v=260308"></script>
 </head>
 <body class="mode-memorize">
     <div class="watermark"></div>
@@ -41,8 +41,7 @@
     <main id="content"></main>
 
     <div class="dock-container">
-        
-        <div id="audio-popup-panel" style="z-index: 3000;">
+        <div id="audio-popup-panel">
             <div style="display:flex; gap:5px; align-items:center;">
                 <button class="spd-btn" onclick="setAudioSpeed(0.8, this)">0.8x</button>
                 <button class="spd-btn active" onclick="setAudioSpeed(1.0, this)">1.0x</button>
