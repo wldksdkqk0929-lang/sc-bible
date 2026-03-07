@@ -622,7 +622,7 @@ window.activateDistrictMode = function(groupName) {
     btn.onclick = function() { loadSpecialData(); };
     nav.appendChild(btn);
 
-    db['special'] = specialData['2월 시험'];
+    db['special'] = specialData['3월 시험'];
     load('special');
     
     const toast = document.getElementById('modeToast');
