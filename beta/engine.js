@@ -11,10 +11,11 @@ let isTestMode = false;
 var recognition = null;
 var isListening = false;
 
-// [오디오 엔진 추가 변수]
+// [오디오 엔진 및 반복 제어 변수]
 let currentAudio = null;
 let currentPlayingBtn = null;
 let audioSpeed = 1.0;
+let currentLoop = 0; // [V26.1 추가] 현재 반복 횟수 추적
 
 // =========================================
 // 2. Storage 제어기 (LocalStorage)
@@ -215,7 +216,6 @@ window.load = function(ch, mode = 'top') {
                     displayTxt = displayTxt.replace(regex, `<span class="user-mark" onclick="deleteMark(this, ${v.n}, '${markTxt}')">$1</span>`);
                 });
             }
-            // 구절 렌더링 영역: v-num-wrapper 및 스피커 버튼 주입
             card.innerHTML = `
                 <div class="v-num-wrapper">
                     <div class="v-num">${v.n}</div>
@@ -697,7 +697,7 @@ window.nextStep = function() { if(currentStep < manualData.length - 1) { current
 window.prevStep = function() { if(currentStep > 0) { currentStep--; renderStep(); } };
 
 // =========================================
-// [V26.0 신규] 11. 오디오 제어 함수군 (Firebase 연동)
+// [V26.1 수리] 11. 오디오 제어 함수군 (반복 엔진 강화)
 // =========================================
 
 window.toggleAudioPanel = function() {
@@ -717,28 +717,24 @@ window.setAudioSpeed = function(speed, btn) {
 };
 
 window.playBibleAudio = function(event, btn, ch, vNum) {
-    if(event) event.stopPropagation(); // 카드 터치 이벤트 방지
+    if(event) event.stopPropagation();
 
-    // [핵심 수술 영역] 파이어베이스 실제 파일명 규격 완벽 동기화 (ex: rev_01_01.m4a)
     const padCh = String(ch).padStart(2, '0');
     const padVNum = String(vNum).padStart(2, '0');
     const fileName = `rev_${padCh}_${padVNum}.m4a`;
-    
-    // Firebase Storage 단일 경로(rev)로 조립
     const baseUrl = "https://firebasestorage.googleapis.com/v0/b/sc-bible-7a046.firebasestorage.app/o/rev%2F";
     const audioUrl = `${baseUrl}${fileName}?alt=media`;
 
-    // 동일한 버튼 클릭 시 정지
     if (currentAudio && currentPlayingBtn === btn) {
         currentAudio.pause();
         currentAudio = null;
         currentPlayingBtn = null;
+        currentLoop = 0; 
         btn.innerText = "🔊";
         btn.classList.remove('playing');
         return;
     }
 
-    // 다른 오디오 재생 중이면 정지
     if (currentAudio) {
         currentAudio.pause();
         if(currentPlayingBtn) {
@@ -747,10 +743,14 @@ window.playBibleAudio = function(event, btn, ch, vNum) {
         }
     }
 
-    // 신규 오디오 생성 및 설정
+    // 반복 횟수 설정값 획득
+    const loopInput = document.getElementById('loopCount');
+    const targetLoops = loopInput ? parseInt(loopInput.value) || 1 : 1;
+    currentLoop = 1; 
+
     currentAudio = new Audio(audioUrl);
     currentAudio.playbackRate = audioSpeed;
-    currentAudio.preservesPitch = true; // 배속 시 음정 왜곡 방지
+    currentAudio.preservesPitch = true;
     currentPlayingBtn = btn;
 
     btn.innerText = "⏹️";
@@ -758,16 +758,23 @@ window.playBibleAudio = function(event, btn, ch, vNum) {
 
     currentAudio.play().catch(e => {
         console.error("Audio Play Error:", e);
-        alert("오디오 파일을 불러올 수 없습니다.");
         btn.innerText = "🔊";
         btn.classList.remove('playing');
     });
 
+    // 반복 로직 핸들러
     currentAudio.onended = function() {
-        btn.innerText = "🔊";
-        btn.classList.remove('playing');
-        currentAudio = null;
-        currentPlayingBtn = null;
+        if (currentLoop < targetLoops) {
+            currentLoop++;
+            this.currentTime = 0; 
+            this.play();          
+        } else {
+            btn.innerText = "🔊";
+            btn.classList.remove('playing');
+            currentAudio = null;
+            currentPlayingBtn = null;
+            currentLoop = 0;
+        }
     };
 };
 
@@ -777,7 +784,6 @@ window.playBibleAudio = function(event, btn, ch, vNum) {
 window.addEventListener('load', function() {
     initTheme();
     
-    // 1~22장 버튼 생성
     const nav = document.getElementById('chNav');
     for(let i=1; i<=22; i++) {
         const b = document.createElement('button');
@@ -787,7 +793,6 @@ window.addEventListener('load', function() {
         nav.appendChild(b);
     }
 
-    // 구역장 버튼 생성
     const optGroup = document.querySelector('.opt-group');
     if (!document.getElementById('btnDistrictMode') && optGroup) {
         const newBtn = document.createElement('button');
@@ -814,7 +819,6 @@ window.addEventListener('load', function() {
         localStorage.setItem('theme', 'light');
     })();
     
-    // 보안 게이트 포커싱
     if (sessionStorage.getItem('isLoggedIn') !== 'true') {
         setTimeout(() => {
             const el = document.getElementById('gate-code');
@@ -822,7 +826,6 @@ window.addEventListener('load', function() {
         }, 500);
     }
     
-    // 보안 게이트 엔터키 이벤트
     const gInput = document.getElementById('gate-code');
     if(gInput) {
         gInput.addEventListener('keypress', function(e) {
@@ -830,7 +833,6 @@ window.addEventListener('load', function() {
         });
     }
 
-    // 매뉴얼 초기 닷 세팅
     const dotsBox = document.getElementById('mDots');
     if (dotsBox && typeof manualData !== 'undefined') {
         manualData.forEach((_, i) => {
