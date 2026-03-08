@@ -1,6 +1,6 @@
 /* ========================================= 
-   1. 통합 디자인 변수 (Root) 
-========================================= */ 
+   [V26.1] 인맞음 시스템 통합 디자인 (Loop Engine)
+   ========================================= */ 
 :root { 
   /* [Day Mode] */ 
   --bg-gradient: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); 
@@ -126,7 +126,7 @@ body.mode-marking .verse-card {
 } 
 
 /* ========================================= 
-   3. Triple-Deck Header (V24.0 New Structure) 
+   3. Triple-Deck Header 
 ========================================= */ 
 header { 
   position: sticky; 
@@ -142,7 +142,6 @@ header {
   box-shadow: 0 4px 20px rgba(0,0,0,0.05); 
 } 
 
-/* 1층: 옵션 컨트롤 타워 */ 
 .deck-options { 
   display: flex; 
   justify-content: space-between; 
@@ -190,7 +189,6 @@ header {
   transform: scale(1.05); 
 } 
 
-/* 2층: 장(Chapter) 네비게이션 */ 
 .deck-chapters { 
   display: flex; 
   align-items: center; 
@@ -231,7 +229,6 @@ header {
   box-shadow: 0 2px 8px rgba(108, 92, 231, 0.3); 
 } 
 
-/* 3층: 소주제(Sub) 네비게이션 */ 
 .deck-subs { 
   display: flex; 
   align-items: center; 
@@ -366,13 +363,13 @@ main {
   border-bottom: none; 
 } 
 
-/* 🎯 [작전 수행] 스피커 버튼 래퍼 원상 복구 (흔들림 방지) */ 
+/* 🎯 [V26.1 수호] 스피커 버튼 래퍼 (반복 중 흔들림 방지 고정) */ 
 .v-num-wrapper { 
   display: flex; 
   flex-direction: column; 
   align-items: center; 
   gap: 8px; 
-  min-width: 30px; 
+  min-width: 32px; /* 살짝 여유 있게 고정 */ 
   flex-shrink: 0; 
   margin-top: 2px; 
 } 
@@ -384,7 +381,6 @@ main {
   font-size: 18px; 
 } 
 
-/* 🎯 [작전 수행] 스피커 버튼 시인성 원상 복구 */
 .speaker-btn { 
   background: var(--glass-border); 
   border: none; 
@@ -398,6 +394,7 @@ main {
   justify-content: center; 
 } 
 
+/* 🎯 [V26.1] 루프 엔진 작동 중 빨간색 맥박 애니메이션 */ 
 .speaker-btn.playing { 
   background: #ff4757; 
   color: white; 
@@ -875,6 +872,7 @@ main {
   .speaker-btn { font-size: 20px; padding: 10px; } 
 } 
 
+/* 🎯 [V26.1] 빨간 버튼 박동 애니메이션 고도화 */ 
 @keyframes pulseRedBtn { 
   0% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7); transform: scale(1); } 
   70% { box-shadow: 0 0 0 10px rgba(255, 71, 87, 0); transform: scale(1.1); } 
