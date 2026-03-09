@@ -723,7 +723,7 @@ window.playBibleAudio = function(event, btn, ch, vNum) {
     const padVNum = String(vNum).padStart(2, '0');
     const fileName = `rev_${padCh}_${padVNum}.m4a`;
     const baseUrl = "https://firebasestorage.googleapis.com/v0/b/sc-bible-7a046.firebasestorage.app/o/rev%2F";
-    const audioUrl = `${baseUrl}${fileName}?alt=media`;
+    const audioUrl = `${baseUrl}${fileName}?alt=media&v=1`;
 
     if (currentAudio && currentPlayingBtn === btn) {
         currentAudio.pause();
