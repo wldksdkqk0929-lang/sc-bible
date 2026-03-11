@@ -15,7 +15,7 @@ var isListening = false;
 let currentAudio = null;
 let currentPlayingBtn = null;
 let audioSpeed = 1.0;
-let currentLoop = 0; // [V26.1 추가] 현재 반복 횟수 추적
+let currentLoop = 0;
 
 // =========================================
 // 2. Storage 제어기 (LocalStorage)
@@ -38,7 +38,10 @@ const Storage = {
             if(data[key].length === 0) delete data[key];
             Storage.set(data);
         }
-    }
+    },
+    // [추가] 마지막 읽은 장 저장/불러오기
+    saveLastChapter: (ch) => localStorage.setItem('last_ch', ch),
+    getLastChapter: () => parseInt(localStorage.getItem('last_ch')) || 1
 };
 
 // =========================================
@@ -89,8 +92,6 @@ window.toggleEditMode = function() {
         window.getSelection().removeAllRanges();
         const saveBtn = document.getElementById('saveMarkBtn');
         saveBtn.style.display = 'none';
-        saveBtn.innerText = "🖍️ 선택 저장";
-        saveBtn.style.background = "";
         document.getElementById('masterBtn').style.display = 'flex';
         toast.innerText = "👆 암기 모드 (터치하여 확인)";
         setTimeout(() => toast.style.opacity = 0, 1500);
@@ -165,18 +166,19 @@ document.addEventListener('selectionchange', handleSelection);
 window.load = function(ch, mode = 'top') {
     if (typeof isTestMode !== 'undefined' && isTestMode) toggleTestMode();
     if(!db[ch]) return;
-    currentChapter = ch; 
+    
+    currentChapter = ch;
+    Storage.saveLastChapter(ch); // [복구 기능] 마지막 장 저장
+
     document.querySelectorAll('.ch-btn').forEach((b,i) => {
-        if (typeof ch === 'number') {
-            b.classList.toggle('active', i+1 === ch);
-        } else {
-            b.classList.toggle('active', b.innerText === '2월 시험');
-        }
+        b.classList.toggle('active', i+1 === ch);
     });
+    
     const main = document.getElementById('content');
     const subNav = document.getElementById('subNav');
     main.innerHTML = ''; subNav.innerHTML = '';
     const savedMarks = Storage.get();
+    
     db[ch].sections.forEach((s, idx) => {
         const sb = document.createElement('button');
         sb.className = 'sub-btn'; sb.innerText = s.t;
@@ -259,9 +261,9 @@ window.moveSection = function(dir) {
     let nextIdx = currentSecIndex + dir;
     isAutoScrolling = true;
     if (nextIdx < 0) {
-        if (typeof currentChapter === 'number' && currentChapter > 1) load(currentChapter - 1, 'bottom');
+        if (currentChapter > 1) load(currentChapter - 1, 'bottom');
     } else if (nextIdx >= sections.length) {
-        if (typeof currentChapter === 'number' && currentChapter < 22) load(currentChapter + 1, 'top');
+        if (currentChapter < 22) load(currentChapter + 1, 'top');
     } else {
         currentSecIndex = nextIdx;
         sections[nextIdx].scrollIntoView({behavior:'smooth', block:'start'});
@@ -284,11 +286,7 @@ window.toggleAll = function(btn) {
     const cards = group.querySelectorAll('.verse-card');
     let hasHidden = Array.from(cards).some(c => c.classList.contains('hidden'));
     cards.forEach(c => c.classList.toggle('hidden', !hasHidden));
-    if (hasHidden) {
-        btn.innerHTML = '<span>🙈</span>';
-    } else {
-        btn.innerHTML = '<span>👁️</span>';
-    }
+    btn.innerHTML = hasHidden ? '<span>🙈</span>' : '<span>👁️</span>';
     updateMasterButtonState();
 };
 
@@ -311,7 +309,7 @@ function updateMasterButtonState() {
     const mBtn = document.getElementById('masterBtn');
     const pc = mBtn.querySelector('.pc-text');
     const mo = mBtn.querySelector('.mobile-text');
-    const chName = typeof currentChapter === 'string' ? currentChapter : currentChapter + "장";
+    const chName = currentChapter + "장";
     if(hasHidden) {
         pc.innerText = `👁️ ${chName} 전체보기`;
         mo.innerText = `👁️ 전체보기`;
@@ -392,7 +390,7 @@ window.toggleTestMode = function() {
     if (isTestMode) {
         btn.innerHTML = '❌';
         btn.classList.add('active');
-        if(typeof isMarkingMode !== 'undefined' && isMarkingMode) toggleEditMode();
+        if(isMarkingMode) toggleEditMode();
         cards.forEach(card => {
             card.classList.add('test-mode');
             const contentEl = card.querySelector('.verse-text');
@@ -433,10 +431,6 @@ window.toggleTestMode = function() {
 function escapeText(text) { return text.replace(/`/g, "").replace(/"/g, "&quot;").replace(/\n/g, " "); }
 
 window.startStt = function(btnElement) {
-    if (/Android|iPhone|iPad/i.test(navigator.userAgent) && location.protocol === 'file:') {
-        alert("⛔ [보안 경고]\n모바일 '내 파일'에서는 마이크가 차단됩니다.\nHTTPS 주소로 접속해주세요.");
-        return;
-    }
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
         alert("이 브라우저는 음성 인식을 지원하지 않습니다."); 
@@ -445,93 +439,55 @@ window.startStt = function(btnElement) {
     const wrapper = btnElement.closest('.test-wrapper');
     const inputArea = wrapper.querySelector('.test-input');
     if (isListening) {
-        if(recognition) {
-            recognition.stop();
-            recognition = null;
-        }
-        isListening = false;
-        btnElement.classList.remove('listening');
-        btnElement.innerHTML = "<span>🎙️</span> 음성 입력";
+        if(recognition) recognition.stop();
         return;
     }
     try {
         recognition = new SpeechRecognition();
         recognition.lang = 'ko-KR';
         recognition.continuous = true; 
-        recognition.interimResults = false; 
-        recognition.onstart = function() {
+        recognition.onstart = () => {
             isListening = true;
             btnElement.classList.add('listening');
             btnElement.innerHTML = "<span>🛑</span> 마침";
         };
-        recognition.onend = function() {
+        recognition.onend = () => {
             isListening = false;
             btnElement.classList.remove('listening');
             btnElement.innerHTML = "<span>🎙️</span> 음성 입력";
         };
-        recognition.onresult = function(event) {
+        recognition.onresult = (event) => {
             let finalTranscript = '';
             for (let i = event.resultIndex; i < event.results.length; ++i) {
-                if (event.results[i].isFinal) {
-                    finalTranscript += event.results[i][0].transcript + ' ';
-                }
+                if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript + ' ';
             }
             inputArea.value += finalTranscript;
-            inputArea.scrollTop = inputArea.scrollHeight;
-        };
-        recognition.onerror = function(event) {
-            console.error("Mic Error:", event.error);
-            if(isListening) {
-                recognition.stop();
-                isListening = false;
-                btnElement.classList.remove('listening');
-                btnElement.innerHTML = "<span>🎙️</span> 음성 입력";
-            }
-            if(event.error === 'not-allowed') alert("마이크 권한을 허용해주세요.");
         };
         recognition.start();
-    } catch (e) {
-        alert("마이크 실행 오류: " + e.message);
-        isListening = false;
-    }
+    } catch (e) { alert("마이크 실행 오류: " + e.message); }
 };
 
 window.gradeVerse = function(btnElement, originalRaw) {
     const wrapper = btnElement.parentElement.parentElement;
     const userText = wrapper.querySelector('.test-input').value.trim();
     const resultDiv = wrapper.querySelector('.grade-result');
-    if (!userText) {
-        alert("내용을 입력해주세요!");
-        return;
-    }
+    if (!userText) { alert("내용을 입력해주세요!"); return; }
+    
     const cleanOrg = originalRaw.replace(/[.,?!'"\(\)\[\]]/g, "").replace(/\s+/g, "");
     const cleanUser = userText.replace(/[.,?!'"\(\)\[\]]/g, "").replace(/\s+/g, "");
     const dmp = new diff_match_patch();
     const diffs = dmp.diff_main(cleanOrg, cleanUser);
     dmp.diff_cleanupSemantic(diffs);
+    
     let htmlBuilder = "";
     let wrongPoints = 0;
     let totalLen = cleanOrg.length;
     for (let i = 0; i < diffs.length; i++) {
         const [type, text] = diffs[i];
-        if (type === 0) {
-            htmlBuilder += `<span class="diff-perfect">${text}</span>`;
-        } else if (type === -1) {
-            if (i + 1 < diffs.length && diffs[i+1][0] === 1) {
-                const nextText = diffs[i+1][1];
-                if (text.length >= 2 && nextText.length >= 1 && text[0] === nextText[0]) {
-                    htmlBuilder += `<span class="diff-particle">${nextText}</span>`;
-                    wrongPoints += (text.length * 0.3);
-                } else {
-                    htmlBuilder += `<span class="diff-missing">[${text}]</span>`;
-                    htmlBuilder += `<span class="diff-wrong">${nextText}</span>`; 
-                    wrongPoints += text.length;
-                }
-                i++;
-            } else {
-                htmlBuilder += `<span class="diff-missing">[${text}]</span>`;
-                wrongPoints += text.length;
-            }
+        if (type === 0) htmlBuilder += `<span class="diff-perfect">${text}</span>`;
+        else if (type === -1) {
+            htmlBuilder += `<span class="diff-missing">[${text}]</span>`;
+            wrongPoints += text.length;
         } else if (type === 1) {
             htmlBuilder += `<span class="diff-wrong">${text}</span>`;
             wrongPoints += text.length;
@@ -541,7 +497,7 @@ window.gradeVerse = function(btnElement, originalRaw) {
     let badgeColor = score >= 90 ? '#00b894' : (score >= 70 ? '#fdcb6e' : '#ff7675');
     resultDiv.style.display = 'block';
     resultDiv.innerHTML = `
-        <div style="background:${badgeColor}; color:#2d3436; display:inline-block; padding:6px 12px; border-radius:20px; font-weight:900; margin-bottom:10px; font-size:15px; box-shadow:0 2px 5px rgba(0,0,0,0.2);">
+        <div style="background:${badgeColor}; color:#2d3436; display:inline-block; padding:6px 12px; border-radius:20px; font-weight:900; margin-bottom:10px; font-size:15px;">
             점수: ${score}점
         </div>
         <div style="margin-top:5px; word-break:break-all;">${htmlBuilder}</div>
@@ -549,90 +505,13 @@ window.gradeVerse = function(btnElement, originalRaw) {
 }
 
 // =========================================
-// 9. 보안 게이트 및 구역장 모달 제어
+// 9. 로비 제어 (보안 해제 버전)
 // =========================================
-;(function(){
-    if (sessionStorage.getItem('isLoggedIn') === 'true') {
-        document.getElementById('security-gate').style.display = 'none';
-    }
-})();
-
 window.unlockGate = function() {
-    const input = document.getElementById('gate-code');
     const gate = document.getElementById('security-gate');
-    const card = document.querySelector('.gate-card');
-    if(input.value === '1440') {
-        sessionStorage.setItem('isLoggedIn', 'true');
-        gate.style.opacity = '0';
-        gate.style.visibility = 'hidden';
-        setTimeout(() => gate.style.display = 'none', 500);
-    } else {
-        card.classList.add('gate-shake');
-        setTimeout(() => card.classList.remove('gate-shake'), 400);
-        input.value = '';
-        input.focus();
-    }
-};
-
-window.openDistrictLogin = function() {
-    document.getElementById('districtModal').style.display = 'block';
-    document.getElementById('dmPass').value = '';
-    document.getElementById('dmPass').focus();
-};
-
-window.closeDistrictLogin = function() {
-    document.getElementById('districtModal').style.display = 'none';
-};
-
-window.checkDistrictLogin = function() {
-    const group = document.getElementById('dmGroup').value;
-    const pass = document.getElementById('dmPass').value;
-    const codes = { 
-        '장년회': '1001', '부녀회': '2002', '청년회': '3003', '자문회': '4004',
-        '학생회': '5005', '지역': '6006', '24부서': '7007'
-    };
-    if (codes[group] === pass) {
-        activateDistrictMode(group);
-        closeDistrictLogin();
-    } else {
-        alert('⛔ 비밀번호가 일치하지 않습니다.');
-        document.getElementById('dmPass').value = '';
-    }
-};
-
-window.activateDistrictMode = function(groupName) {
-    document.body.classList.add('mode-district');
-    const wmText = `순천 ${groupName} 천국고시 준비자료`;
-    const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' transform='rotate(-45 150 150)' fill='%232c3e50' font-size='18' font-weight='bold' font-family='sans-serif'>${wmText}</text></svg>`;
-    const encoded = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
-    document.querySelector('.watermark').style.backgroundImage = `url("${encoded}")`;
-    
-    const nav = document.getElementById('chNav');
-    nav.innerHTML = ''; 
-    
-    const exitBtn = document.createElement('button');
-    exitBtn.className = 'ch-btn';
-    exitBtn.innerText = '⬅ 나가기';
-    exitBtn.onclick = function() { location.reload(); }; 
-    nav.appendChild(exitBtn);
-
-    const btn = document.createElement('button');
-    btn.className = 'ch-btn active';
-    btn.innerText = '3월 시험';
-    btn.onclick = function() { loadSpecialData(); };
-    nav.appendChild(btn);
-
-    db['special'] = specialData['3월 시험'];
-    load('special');
-    
-    const toast = document.getElementById('modeToast');
-    toast.innerHTML = `👨‍🎓 <b>구역장 모드 (${groupName})</b><br>환영합니다.`;
-    toast.style.opacity = 1;
-    setTimeout(()=>toast.style.opacity=0, 2000);
-};
-
-window.loadSpecialData = function() {
-    load('special');
+    gate.style.opacity = '0';
+    gate.style.visibility = 'hidden';
+    setTimeout(() => gate.style.display = 'none', 500);
 };
 
 // =========================================
@@ -655,40 +534,27 @@ window.closeManual = function() {
     const overlay = document.getElementById('manualOverlay');
     overlay.classList.remove('show');
     overlay.style.opacity = '0';
-    setTimeout(() => {
-        overlay.style.display = 'none';
-    }, 300);
+    setTimeout(() => overlay.style.display = 'none', 300);
 };
 
 window.renderStep = function() {
+    if(typeof manualData === 'undefined') return;
     const data = manualData[currentStep];
     document.getElementById('mStepBadge').innerText = `Step ${currentStep + 1} / ${manualData.length}`;
     document.getElementById('mTitle').innerText = data.title;
     document.getElementById('mDesc').innerText = data.desc;
+    document.getElementById('mVisualZone').innerHTML = `<div class="visual-item active">${data.html}</div>`;
     
-    const vZone = document.getElementById('mVisualZone');
-    vZone.innerHTML = `<div class="visual-item active">${data.html}</div>`;
-    
-    const btnPrev = document.querySelector('.btn-prev');
-    const btnNext = document.querySelector('.btn-next');
-    const btnStart = document.querySelector('.btn-start');
-    
-    btnPrev.style.visibility = currentStep === 0 ? 'hidden' : 'visible';
-    
-    if(currentStep === manualData.length - 1) {
-        btnNext.style.display = 'none';
-        btnStart.style.display = 'block';
-    } else {
-        btnNext.style.display = 'block';
-        btnStart.style.display = 'none';
-    }
+    document.querySelector('.btn-prev').style.visibility = currentStep === 0 ? 'hidden' : 'visible';
+    const isLast = currentStep === manualData.length - 1;
+    document.querySelector('.btn-next').style.display = isLast ? 'none' : 'block';
+    document.querySelector('.btn-start').style.display = isLast ? 'block' : 'none';
     
     const dotsBox = document.getElementById('mDots');
     dotsBox.innerHTML = ''; 
     manualData.forEach((_, i) => {
         const dot = document.createElement('div');
-        dot.className = 'm-dot';
-        if(i === currentStep) dot.classList.add('active');
+        dot.className = i === currentStep ? 'm-dot active' : 'm-dot';
         dotsBox.appendChild(dot);
     });
 };
@@ -697,41 +563,29 @@ window.nextStep = function() { if(currentStep < manualData.length - 1) { current
 window.prevStep = function() { if(currentStep > 0) { currentStep--; renderStep(); } };
 
 // =========================================
-// [V26.1 수리] 11. 오디오 제어 함수군 (반복 엔진 강화)
+// 11. 오디오 제어 함수군
 // =========================================
-
 window.toggleAudioPanel = function() {
     const panel = document.getElementById('audio-popup-panel');
-    if(panel) {
-        panel.classList.toggle('show');
-    }
+    if(panel) panel.classList.toggle('show');
 };
 
 window.setAudioSpeed = function(speed, btn) {
     audioSpeed = parseFloat(speed);
-    if(currentAudio) {
-        currentAudio.playbackRate = audioSpeed;
-    }
+    if(currentAudio) currentAudio.playbackRate = audioSpeed;
     document.querySelectorAll('.spd-btn').forEach(b => b.classList.remove('active'));
     if(btn) btn.classList.add('active');
 };
 
 window.playBibleAudio = function(event, btn, ch, vNum) {
     if(event) event.stopPropagation();
-
     const padCh = String(ch).padStart(2, '0');
     const padVNum = String(vNum).padStart(2, '0');
-    const fileName = `rev_${padCh}_${padVNum}.m4a`;
-    const baseUrl = "https://firebasestorage.googleapis.com/v0/b/sc-bible-7a046.firebasestorage.app/o/rev%2F";
-    const audioUrl = `${baseUrl}${fileName}?alt=media&v=1`;
+    const audioUrl = `https://firebasestorage.googleapis.com/v0/b/sc-bible-7a046.firebasestorage.app/o/rev%2Frev_${padCh}_${padVNum}.m4a?alt=media`;
 
     if (currentAudio && currentPlayingBtn === btn) {
-        currentAudio.pause();
-        currentAudio = null;
-        currentPlayingBtn = null;
-        currentLoop = 0; 
-        btn.innerText = "🔊";
-        btn.classList.remove('playing');
+        currentAudio.pause(); currentAudio = null; currentPlayingBtn = null;
+        btn.innerText = "🔊"; btn.classList.remove('playing');
         return;
     }
 
@@ -743,37 +597,23 @@ window.playBibleAudio = function(event, btn, ch, vNum) {
         }
     }
 
-    // 반복 횟수 설정값 획득
-    const loopInput = document.getElementById('loopCount');
-    const targetLoops = loopInput ? parseInt(loopInput.value) || 1 : 1;
+    const targetLoops = parseInt(document.getElementById('loopCount').value) || 1;
     currentLoop = 1; 
-
     currentAudio = new Audio(audioUrl);
     currentAudio.playbackRate = audioSpeed;
-    currentAudio.preservesPitch = true;
     currentPlayingBtn = btn;
+    btn.innerText = "⏹️"; btn.classList.add('playing');
 
-    btn.innerText = "⏹️";
-    btn.classList.add('playing');
-
-    currentAudio.play().catch(e => {
-        console.error("Audio Play Error:", e);
-        btn.innerText = "🔊";
-        btn.classList.remove('playing');
+    currentAudio.play().catch(() => {
+        btn.innerText = "🔊"; btn.classList.remove('playing');
     });
 
-    // 반복 로직 핸들러
     currentAudio.onended = function() {
         if (currentLoop < targetLoops) {
-            currentLoop++;
-            this.currentTime = 0; 
-            this.play();          
+            currentLoop++; this.currentTime = 0; this.play();          
         } else {
-            btn.innerText = "🔊";
-            btn.classList.remove('playing');
-            currentAudio = null;
-            currentPlayingBtn = null;
-            currentLoop = 0;
+            btn.innerText = "🔊"; btn.classList.remove('playing');
+            currentAudio = null; currentPlayingBtn = null;
         }
     };
 };
@@ -783,63 +623,23 @@ window.playBibleAudio = function(event, btn, ch, vNum) {
 // =========================================
 window.addEventListener('load', function() {
     initTheme();
+    const lastCh = Storage.getLastChapter(); // [복구] 마지막 장 확인
     
     const nav = document.getElementById('chNav');
     for(let i=1; i<=22; i++) {
         const b = document.createElement('button');
-        b.className = `ch-btn ${i===1?'active':''}`;
+        b.className = `ch-btn ${i===lastCh?'active':''}`;
         b.innerText = i + "장"; 
         b.onclick = () => load(i);
         nav.appendChild(b);
     }
 
-    const optGroup = document.querySelector('.opt-group');
-    if (!document.getElementById('btnDistrictMode') && optGroup) {
-        const newBtn = document.createElement('button');
-        newBtn.id = 'btnDistrictMode';
-        newBtn.className = 'icon-btn';
-        newBtn.innerHTML = '👨‍🎓';
-        newBtn.title = '구역장 모드';
-        newBtn.onclick = () => window.openDistrictLogin(); 
-        optGroup.insertBefore(newBtn, optGroup.firstElementChild); 
-    }
-
-    setTimeout(() => load(1), 100);
+    setTimeout(() => load(lastCh), 100);
     
     document.body.addEventListener('touchstart', function(e) {
         const btn = e.target.closest('button');
         if (btn && (btn.innerText.includes('저장') || btn.innerText.includes('🖍'))) {
-            e.preventDefault(); 
-            btn.click();
+            e.preventDefault(); btn.click();
         }
     }, { passive: false });
-    
-    (function forceDayModeStart() {
-        document.documentElement.setAttribute('data-theme', 'light');
-        localStorage.setItem('theme', 'light');
-    })();
-    
-    if (sessionStorage.getItem('isLoggedIn') !== 'true') {
-        setTimeout(() => {
-            const el = document.getElementById('gate-code');
-            if(el) el.focus();
-        }, 500);
-    }
-    
-    const gInput = document.getElementById('gate-code');
-    if(gInput) {
-        gInput.addEventListener('keypress', function(e) {
-            if(e.key === 'Enter') unlockGate();
-        });
-    }
-
-    const dotsBox = document.getElementById('mDots');
-    if (dotsBox && typeof manualData !== 'undefined') {
-        manualData.forEach((_, i) => {
-            const dot = document.createElement('div');
-            dot.className = 'm-dot';
-            if(i===0) dot.classList.add('active');
-            dotsBox.appendChild(dot);
-        });
-    }
 });

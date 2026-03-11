@@ -1,26 +1,17 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-T5N2GXF8TF"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-T5N2GXF8TF');
-    </script>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>인맞음 암기 시스템 (V26.1 + Loop Engine)</title>
+    <title>인맞음 암기 시스템 (오픈소스 버전)</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/diff_match_patch/20121119/diff_match_patch.js"></script>
 
-    <link rel="stylesheet" href="styles.css?v=26.1">
-    <script src="data.js?v=26.1"></script>
-    <script defer src="engine.js?v=26.1"></script>
+    <link rel="stylesheet" href="styles.css">
+    <script src="data.js"></script>
+    <script defer src="engine.js"></script>
 </head>
 <body class="mode-memorize">
-    <div class="watermark"></div>
     <div id="modeToast"></div>
     
     <header>
@@ -87,13 +78,10 @@
 
     <div id="security-gate">
         <div class="gate-card">
-            <div style="font-size:36px; margin-bottom:10px;">🔐</div>
+            <div style="font-size:36px; margin-bottom:10px;">✨</div>
             <h2 class="gate-title">인맞음 암기 시스템</h2>
-            <p class="gate-desc">보안 코드를 입력하고 입장하세요.</p>
-            <div class="gate-input-wrap">
-                <input type="tel" id="gate-code" class="gate-input" placeholder="CODE" maxlength="4" autocomplete="off">
-            </div>
-            <button class="gate-btn" onclick="unlockGate()">입장하기</button>
+            <p class="gate-desc">진리의 말씀 앞에 오신 여러분을 환영합니다.</p>
+            <button class="gate-btn" onclick="unlockGate()">📜 입장하기</button>
             <button class="gate-manual-btn" onclick="openManual()">📖 사용법 보기</button>
         </div>
     </div>
@@ -101,7 +89,7 @@
     <div id="manualOverlay">
         <div class="manual-box">
             <div class="m-header">
-                <span class="m-step-badge" id="mStepBadge">Step 1 / 8</span>
+                <span class="m-step-badge" id="mStepBadge">Step 1 / 7</span>
                 <button class="m-close-btn" onclick="closeManual()">✕</button>
             </div>
             <div class="m-visual-zone" id="mVisualZone"></div>
@@ -117,25 +105,5 @@
             </div>
         </div>
     </div>
-
-    <div id="districtModal" style="display:none;">
-        <div class="dm-overlay" onclick="closeDistrictLogin()"></div>
-        <div class="dm-card">
-            <h2 style="margin:0 0 15px 0; color:#2d3436;">👨‍🎓 구역장 모드 진입</h2>
-            <select id="dmGroup" class="dm-input">
-                <option value="장년회">장년회</option>
-                <option value="부녀회">부녀회</option>
-                <option value="청년회">청년회</option>
-                <option value="자문회">자문회</option>
-                <option value="학생회">학생회</option>
-                <option value="지역">지역</option>
-                <option value="24부서">24부서</option>
-            </select>
-            <input type="tel" id="dmPass" class="dm-input" placeholder="비밀번호 입력" maxlength="4">
-            <button class="dm-btn" onclick="checkDistrictLogin()">확인</button>
-            <button class="dm-close" onclick="closeDistrictLogin()">취소</button>
-        </div>
-    </div>
-
 </body>
 </html>
